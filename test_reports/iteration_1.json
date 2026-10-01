@@ -1,0 +1,94 @@
+{
+  "iteration": 1,
+  "summary": "8/8 acceptance criteria covered: 2 backend test files (3 tests) + 8 browser checks, all passed.",
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "criterion": "Home dashboard and live rates behave interactively (FX pairs data)",
+      "name": "test_tscheck_fx_rates.py::test_fx_rates_returns_three_aud_pairs",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/fx/rates -> 200, base=AUD, pairs={AUD/USD,AUD/EUR,AUD/GBP}, each source in (live|fallback)"
+    },
+    {
+      "criterion": "Lead capture persists through the API (happy path)",
+      "name": "test_tscheck_submissions.py::test_submission_with_consent_is_created",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/submissions {kind:newsletter, unique @example.com, consent:true} -> 201 {ok:true, id, received_at}"
+    },
+    {
+      "criterion": "Lead capture persists through the API (consent rejection)",
+      "name": "test_tscheck_submissions.py::test_submission_without_consent_is_rejected",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/submissions {consent:false} -> 400 {detail:'Consent is required'}"
+    },
+    {
+      "criterion": "All requested public routes and global navigation are usable",
+      "name": "navigation-routes-render",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Ran on public preview URL. Verified Home, About, Services, Insights, article detail (via featured card click), Contact, Login, Privacy, Terms, Compliance, and branded 404 for an unknown route all render with header visible."
+    },
+    {
+      "criterion": "Home dashboard and live rates behave interactively",
+      "name": "home-dashboard-interactive",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Currency tab switch (EUR->GBP) changed cashflow value and currency symbol; horizon toggle (6M->12M) updated active state; FX strip rendered AUD/USD, AUD/EUR, AUD/GBP rate cards."
+    },
+    {
+      "criterion": "Lead capture persists through the API (UI forms)",
+      "name": "lead-capture-forms-submit",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Hedge-guide modal, contact form, and newsletter form each submitted with unique @example.com + consent and showed their *-form-success state; a contact submission without consent was blocked client-side (no success state shown)."
+    },
+    {
+      "criterion": "Market Insights interactions work",
+      "name": "insights-interactions-work",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Filter chip click updated visible cards, Load More increased card count, featured card and a trending topic link both navigated to an article, newsletter role/cadence radio control toggled to 'daily'."
+    },
+    {
+      "criterion": "Language and RTL controls work without breaking the page",
+      "name": "language-rtl-controls-work",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Google Translate network calls blocked to isolate app logic per spec deviation note. Menu opens/closes, localStorage 'switchyard-language' set to 'ar' then 'en', html dir switched rtl->ltr, persisted across reload, hidden translate div kept aria-hidden=true with no body offset."
+    },
+    {
+      "criterion": "Mobile navigation and responsive layout are usable",
+      "name": "mobile-nav-responsive",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At 390x844 viewport: hamburger opens full-screen menu exposing About/Services/Market Insights/Contact/Login links and language switcher; clicking Services navigated and closed the menu; scrollWidth<=clientWidth before and after (no horizontal overflow)."
+    },
+    {
+      "criterion": "Contact, login, cookie, and external action flows work",
+      "name": "contact-login-cookie-external-flows",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Contact cards expose tel:/mailto:/wa.me/maps links and WeChat card; Cal embed + cal.com link and Loom link present; floating WhatsApp button present; cookie banner dismissed on Accept; demo login shows login-success-heading after submit."
+    },
+    {
+      "criterion": "Core accessibility and runtime quality are intact",
+      "name": "accessibility-runtime-quality",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "document.title updates per route (Home/About/Contact), header login link keyboard-focusable, a prefers-reduced-motion media rule exists in stylesheet, zero failed /api requests and zero non-network console errors during the flow."
+    }
+  ],
+  "bugs": [],
+  "notes": [
+    {
+      "criterion": "Language and RTL controls",
+      "note": "When the real Google Translate script is allowed to load (not blocked), Google's own top banner iframe ('Translated to: Arabic / Show original / Options') rendered visibly and reflowed the page layout during manual exploration, even though the app ships CSS (.goog-te-banner-frame.skiptranslate{display:none!important}) intended to suppress it. This did not break RTL or localStorage persistence (verified in the passing check with the external script blocked), but the banner-hidden guarantee is not fully met when Google's script actually loads in an unblocked environment. Classified as a note per the briefing's spec_deviations allowance for external Google Translate behavior, not a bug."
+    }
+  ],
+  "action_items": [],
+  "retest_needed": false
+}

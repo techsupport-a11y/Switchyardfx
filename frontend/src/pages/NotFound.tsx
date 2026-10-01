@@ -1,0 +1,5 @@
+import { ArrowRight, Compass } from "lucide-react";
+import { Link } from "react-router-dom";
+import { buttonVariants } from "@/components/ui/button";
+
+export default function NotFound() { return <section className="grid min-h-[calc(100svh-80px)] place-items-center bg-[#12261F] px-5 text-center text-white" data-testid="not-found-page"><div><div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#A8C5BA] text-[#12261F]"><Compass size={30} /></div><p className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-[#A8C5BA]">404</p><h1 className="mt-4 text-5xl font-bold tracking-[-0.05em]" data-testid="not-found-heading">This page took a wrong turn.</h1><p className="mx-auto mt-5 max-w-md text-white/60">The page you are looking for has moved, or it never existed.</p><Link to="/" className={buttonVariants({ size: "lg" }) + " mt-8 rounded-full bg-[#A8C5BA] text-[#12261F]"} data-testid="not-found-home-link">Return home <ArrowRight size={17} /></Link></div></section>; }

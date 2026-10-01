@@ -1,0 +1,125 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: "Gill Sans", "Trebuchet MS", sans-serif;
+    --font-sans: "Gill Sans", "Trebuchet MS", sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: #F5F7F6;
+    --foreground: #12261F;
+    --card: #FFFFFF;
+    --card-foreground: #12261F;
+    --popover: #FFFFFF;
+    --popover-foreground: #12261F;
+    --primary: #2D6A4F;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E8EEEB;
+    --secondary-foreground: #12261F;
+    --muted: #E8EEEB;
+    --muted-foreground: #4A5A55;
+    --accent: #A8C5BA;
+    --accent-foreground: #12261F;
+    --destructive: #B42318;
+    --border: #DCE5E1;
+    --input: #DCE5E1;
+    --ring: #52796F;
+    --chart-1: #2D6A4F;
+    --chart-2: #52796F;
+    --chart-3: #A8C5BA;
+    --chart-4: #12261F;
+    --chart-5: #4A5A55;
+    --radius: 1rem;
+    --sidebar: #F5F7F6;
+    --sidebar-foreground: #12261F;
+    --sidebar-primary: #2D6A4F;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #E8EEEB;
+    --sidebar-accent-foreground: #12261F;
+    --sidebar-border: #DCE5E1;
+    --sidebar-ring: #52796F;
+}
+
+.dark {
+    --background: #12261F;
+    --foreground: #FFFFFF;
+    --card: #1C382E;
+    --card-foreground: #FFFFFF;
+    --popover: #1C382E;
+    --popover-foreground: #FFFFFF;
+    --primary: #A8C5BA;
+    --primary-foreground: #12261F;
+    --secondary: #2D6A4F;
+    --secondary-foreground: #FFFFFF;
+    --muted: #1C382E;
+    --muted-foreground: #A8C5BA;
+    --accent: #2D6A4F;
+    --accent-foreground: #FFFFFF;
+    --border: rgba(255,255,255,.1);
+    --input: rgba(255,255,255,.15);
+    --ring: #A8C5BA;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Gill Sans", "Trebuchet MS", sans-serif;
+    overflow-x: hidden;
+    }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    }
+}
+
+body { top: 0 !important; }
+#google_translate_element { position: fixed; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; z-index: -1; }
+.goog-te-banner-frame.skiptranslate, .goog-te-balloon-frame, #goog-gt-tt, .goog-tooltip { display: none !important; }
+html[dir="rtl"] { text-align: right; }
+html[dir="rtl"] .lucide { transform: scaleX(-1); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
