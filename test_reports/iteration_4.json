@@ -1,0 +1,59 @@
+{
+  "iteration": 4,
+  "summary": "Premium homepage landing intro: 6/6 acceptance criteria covered with 6 new browser checks, all passed. No backend-bearing criteria in this matrix.",
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    {
+      "criterion": "Premium homepage intro plays on first visit",
+      "name": "intro-plays-on-first-visit",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "With switchyard-intro-seen cleared, navigating to / showed landing-intro with landing-intro-mark='S', landing-intro-brand='SwitchYard', landing-intro-tagline='Clarity in motion'; intro became hidden (exited) within 3s, revealing the hero."
+    },
+    {
+      "criterion": "Intro plays only once per browser session",
+      "name": "intro-plays-only-once-per-session",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "After first intro completed and hid, a full page reload rendered zero landing-intro elements; navigating to /about then back to / also rendered zero landing-intro elements, confirming sessionStorage persistence across reload and in-SPA navigation."
+    },
+    {
+      "criterion": "Intro is scoped to the homepage",
+      "name": "intro-scoped-to-homepage-only",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "With switchyard-intro-seen cleared each time, direct goto of /about, /services, /insights, /contact, /login each rendered zero landing-intro elements."
+    },
+    {
+      "criterion": "Reduced-motion users bypass the intro",
+      "name": "intro-reduced-motion-bypass",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "With emulateMedia reducedMotion='reduce' and session key cleared, / rendered zero landing-intro elements immediately, site-shell/hero visible instantly, and document.body.style.overflow was not locked ('' / 'visible')."
+    },
+    {
+      "criterion": "Intro exit leaves the live homepage fully usable",
+      "name": "intro-exit-leaves-homepage-usable",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "After intro hid, body.style.overflow restored to default, hero-market-source badge read 'LIVE \u00b7 TWELVE DATA', page remained interactive through a scroll, and zero non-benign console/page errors plus zero failed /api requests were captured (the one benign 'sessionStorage sandboxed' harness message was filtered as pre-existing automation-sandbox noise seen identically on unrelated pre-existing checks, not an app defect)."
+    },
+    {
+      "criterion": "Intro remains responsive",
+      "name": "intro-responsive-at-375px",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At 375x812, landing-intro-mark/brand/tagline all visible and fully within the 0-375px horizontal bounds, documentElement.scrollWidth <= 377 during the intro; after exit the hero also stayed within scrollWidth <= 377, confirming no horizontal overflow before or after exit."
+    }
+  ],
+  "bugs": [],
+  "notes": [
+    {
+      "criterion": "All",
+      "note": "A benign pageerror 'Failed to read the sessionStorage property from Window: sandboxed and lacks allow-same-origin' appears consistently across every check in this automation harness (including unrelated, pre-existing checks run previously), indicating it originates from the test runner's iframe sandboxing rather than the SwitchYard app. It was excluded from the console-error assertion in intro-exit-leaves-homepage-usable accordingly and did not block any assertion elsewhere since the app's own sessionStorage usage (verified functionally via once-per-session behavior) still worked correctly."
+    }
+  ],
+  "action_items": [],
+  "retest_needed": false
+}

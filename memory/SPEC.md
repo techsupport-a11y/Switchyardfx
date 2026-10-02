@@ -42,3 +42,4 @@ Frankfurter public FX API via backend with fallback; hidden Google Translate bri
 ## Global shell shape
 - Header is fixed over the hero with a transparent, integrated top state; after 80px of scroll its centered max-1280px, 20px capsule surface fades into a solid blurred state.
 - Footer is separated from page content by a small light gap and uses 32px rounded top corners.
+- The homepage plays a one-second SwitchYard / “Clarity in motion” intro once per browser session, then wipes upward into the live hero; reduced-motion users skip it immediately.
