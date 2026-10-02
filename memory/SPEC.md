@@ -38,3 +38,7 @@ Frankfurter public FX API via backend with fallback; hidden Google Translate bri
 - Responses are cached in-process for 60 seconds to conserve provider quota.
 - Provider errors, incomplete payloads, and HTTP 429s return clearly labeled indicative fallback quotes and candles.
 - The hero refreshes once per minute and exposes 2H, 4H, 6H, and 1D chart windows.
+
+## Global shell shape
+- Header uses a centered max-1280px floating capsule with 20px corners and scroll-state blur/shadow.
+- Footer is separated from page content by a small light gap and uses 32px rounded top corners.
