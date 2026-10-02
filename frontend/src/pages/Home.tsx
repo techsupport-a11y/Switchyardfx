@@ -41,7 +41,7 @@ export default function Home() {
       <div className="hero-grid absolute inset-0 opacity-25" />
       <motion.div className="absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#2D6A4F]/35 blur-[110px]" animate={{ scale: [1, 1.12, 1], opacity: [0.45, 0.7, 0.45] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
       <div className="absolute -bottom-24 left-[12%] h-72 w-72 rounded-full bg-[#A8C5BA]/10 blur-[90px]" />
-      <div className="relative mx-auto grid min-h-[calc(100svh-76px)] max-w-7xl grid-cols-[minmax(0,1fr)] gap-14 px-5 pb-20 pt-14 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:px-8 lg:pb-24 lg:pt-20">
+      <div className="relative mx-auto grid min-h-svh max-w-7xl grid-cols-[minmax(0,1fr)] gap-14 px-5 pb-20 pt-32 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:px-8 lg:pb-24 lg:pt-32">
         <motion.div className="relative z-10 min-w-0" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#A8C5BA]/30 bg-white/[0.06] px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-[#A8C5BA] backdrop-blur-md" data-testid="hero-badge"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#A8C5BA] opacity-60" /><span className="relative h-2 w-2 rounded-full bg-[#A8C5BA]" /></span> FOR MID-MARKET CFOs</div>
           <h1 className="max-w-2xl text-5xl font-bold leading-[0.96] tracking-[-0.055em] sm:text-6xl lg:text-[4.65rem]" data-testid="hero-heading">See risk clearly.<br /><span className="text-[#A8C5BA]">Move with confidence.</span></h1>

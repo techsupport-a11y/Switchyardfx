@@ -40,5 +40,5 @@ Frankfurter public FX API via backend with fallback; hidden Google Translate bri
 - The hero refreshes once per minute and exposes 2H, 4H, 6H, and 1D chart windows.
 
 ## Global shell shape
-- Header uses a centered max-1280px floating capsule with 20px corners and scroll-state blur/shadow.
+- Header is fixed over the hero with a transparent, integrated top state; after 80px of scroll its centered max-1280px, 20px capsule surface fades into a solid blurred state.
 - Footer is separated from page content by a small light gap and uses 32px rounded top corners.
