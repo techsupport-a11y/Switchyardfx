@@ -25,3 +25,9 @@ Frankfurter public FX API via backend with fallback; hidden Google Translate bri
 - `VITE_DATA_MODE=mock` is the default and uses isolated interactive demo behavior from `src/data/mockSwitchyard.ts`.
 - `VITE_DATA_MODE=api` routes all data through `src/services/switchyard.ts`, currently matching `GET /api/fx/rates` and `POST /api/submissions`.
 - Backend replacement requires editing the service adapter and mirrored interfaces only; pages and components do not call endpoints directly.
+
+## Homepage interaction refresh
+- Hero uses a layered market command centre with currency/horizon controls, animated SVG exposure line, live ticker, floating status cards, and reduced-motion-safe pointer depth.
+- Added CFO outcomes, animated proof metrics, interactive exposure scenarios, and client-story carousel sections.
+- Scroll reveals use eased fade/blur motion with reduced-motion fallback.
+- Header/cookie/WhatsApp layering and mobile bottom spacing are normalized to prevent overlap; dark section labels use the sage contrast color.

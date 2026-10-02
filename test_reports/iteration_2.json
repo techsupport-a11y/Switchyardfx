@@ -1,0 +1,73 @@
+{
+  "iteration": 2,
+  "summary": "Homepage redesign retest: 7/7 UI acceptance criteria covered with 7 new browser checks, all passed. Pre-existing backend suite (fx rates, submissions) re-run clean as a sanity cross-check.",
+  "passed": 8,
+  "failed": 0,
+  "checks": [
+    {
+      "criterion": "The redesigned hero is visually complete and interactive",
+      "name": "hero-command-centre-interactive",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Desktop 1440px: hero copy left of command centre card (card x > heading x); GBP currency tab changed dashboard-cashflow-value; 12M horizon toggle got active class; ticker, margin card ($184k) and settlement card visible with no clipping. 375px: heading, both CTAs, and command centre visible with scrollWidth-clientWidth=0."
+    },
+    {
+      "criterion": "Reported header, colour, and floating-control overlap issues are resolved",
+      "name": "floating-controls-no-overlap",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Hero heading starts below sticky header bottom edge. At 375px with switchyard-cookies cleared, WhatsApp button rect and cookie-banner rect do not intersect (CSS body:has() rule pushes button to bottom:15rem while banner is mounted). After Accept, banner unmounts and the button's CSS transition settles to ~16px from the viewport bottom within 2s (confirmed via polling) -- initial measurement without a settle-wait was flaky, resolved on rerun, not a bug."
+    },
+    {
+      "criterion": "New CFO outcomes and animated metrics sections render correctly",
+      "name": "cfo-outcomes-and-metrics-render",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Three cfo-outcome-card elements visible with hover-triggered y-translate; four metric-N cards visible and AnimatedCounter text settled to '20+', '98%', '50+', '15 min' within 4s; sage label color resolved to a non-empty computed color on the dark section."
+    },
+    {
+      "criterion": "Exposure scenarios are interactive",
+      "name": "exposure-scenarios-tabs-interactive",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Conservative/Balanced/Flexible tabs each set aria-selected=true on click, scenario-result-card stayed within viewport bounds for all three, and protected-outcome text was distinct per tab (no stale copy); tab also keyboard-focusable."
+    },
+    {
+      "criterion": "Client proof carousel is interactive",
+      "name": "client-proof-carousel-interactive",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Next changed client-story-quote from quote1 to a different quote2; Previous returned to quote1; at 375px the story card stayed within the viewport (no x-clipping) and Next worked post-resize."
+    },
+    {
+      "criterion": "Scroll motion is smooth and accessible",
+      "name": "scroll-reveal-reduced-motion",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "cfo-outcomes-section reached opacity>=0.9 after scrollIntoViewIfNeeded; with prefers-reduced-motion=reduce, .market-ticker animation-name computed to 'none' while hero heading and all three cfo-outcome-card elements remained visible (content preserved)."
+    },
+    {
+      "criterion": "Core homepage regression remains clean",
+      "name": "homepage-regression-on-preview",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Run against public preview URL. Mobile hamburger menu opened and About nav link routed to /about; hedge-guide modal form submitted a tscheck-regress-<ts>@example.com lead and showed its *-form-success state; footer and privacy link visible; hero CTA links to cal.com; zero /api 4xx/5xx responses and zero non-benign console errors captured during the whole flow."
+    },
+    {
+      "criterion": "(sanity cross-check, not in current matrix) Pre-existing backend API suite still healthy",
+      "name": "backend/tests (test_tscheck_fx_rates.py, test_tscheck_submissions.py)",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "python -m pytest -q: 3 passed in 3.80s (GET /api/fx/rates, POST /api/submissions consent accept/reject)."
+    }
+  ],
+  "bugs": [],
+  "notes": [
+    {
+      "criterion": "Reported header, colour, and floating-control overlap issues are resolved",
+      "note": "The WhatsApp button's return to its bottom corner after cookie dismissal relies on a CSS transition (duration-300) keyed off a body:has() selector losing its match when the cookie banner unmounts. Measuring the button's position immediately after the Accept click (no settle wait) reads a stale position for up to ~300ms; this is expected animation behavior, not a functional defect -- confirmed correct once given time to settle."
+    }
+  ],
+  "action_items": [],
+  "retest_needed": false
+}

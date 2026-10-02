@@ -123,3 +123,27 @@ body { top: 0 !important; }
 html[dir="rtl"] { text-align: right; }
 html[dir="rtl"] .lucide { transform: scaleX(-1); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+.hero-grid {
+  background-image: linear-gradient(rgba(168, 197, 186, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(168, 197, 186, .07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.hero-fade { background: linear-gradient(to bottom, transparent, rgba(18, 38, 31, .92)); }
+.dark-surface .section-label { color: #A8C5BA; }
+.section-transition { box-shadow: inset 0 1px 0 rgba(82, 121, 111, .08); }
+.market-ticker { animation: market-ticker 20s linear infinite; }
+
+@keyframes market-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-ticker { animation: none; }
+}
+
+@media (max-width: 639px) {
+  body:has([data-testid="cookie-consent-banner"]) [data-testid="floating-whatsapp-button"] { bottom: 15rem; }
+}
