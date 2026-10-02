@@ -31,3 +31,10 @@ Frankfurter public FX API via backend with fallback; hidden Google Translate bri
 - Added CFO outcomes, animated proof metrics, interactive exposure scenarios, and client-story carousel sections.
 - Scroll reveals use eased fade/blur motion with reduced-motion fallback.
 - Header/cookie/WhatsApp layering and mobile bottom spacing are normalized to prevent overlap; dark section labels use the sage contrast color.
+
+## Live hero market data
+- `GET /api/market/overview` proxies Twelve Data on the server and returns batched AUD/USD, AUD/EUR, AUD/GBP quotes plus 32 ascending AUD/USD 15-minute closes.
+- The API key is backend-only in `backend/.env`; it is never exposed to Vite or browser requests.
+- Responses are cached in-process for 60 seconds to conserve provider quota.
+- Provider errors, incomplete payloads, and HTTP 429s return clearly labeled indicative fallback quotes and candles.
+- The hero refreshes once per minute and exposes 2H, 4H, 6H, and 1D chart windows.

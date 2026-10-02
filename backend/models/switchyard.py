@@ -19,6 +19,26 @@ class FxRatesResponse(BaseModel):
     rates: list[FxRate]
 
 
+class MarketQuote(BaseModel):
+    pair: str
+    rate: float
+    change: float
+
+
+class MarketCandle(BaseModel):
+    timestamp: str
+    close: float
+
+
+class MarketOverviewResponse(BaseModel):
+    source: Literal["live", "fallback"]
+    provider: Literal["Twelve Data", "Indicative fallback"]
+    as_of: str
+    quotes: list[MarketQuote]
+    candles: list[MarketCandle]
+    warning: str | None = None
+
+
 class SubmissionCreate(BaseModel):
     kind: SubmissionKind
     email: EmailStr

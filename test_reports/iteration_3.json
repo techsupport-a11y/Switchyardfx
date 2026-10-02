@@ -1,0 +1,66 @@
+{
+  "iteration": 3,
+  "summary": "Live Twelve Data market feed: 7/7 acceptance criteria covered with 3 new backend test files + 4 new browser checks, all passed.",
+  "passed": 7,
+  "failed": 0,
+  "checks": [
+    {
+      "criterion": "Twelve Data market overview endpoint returns the synchronized live contract",
+      "name": "test_tscheck_market_overview_live.py::test_market_overview_returns_live_contract",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/market/overview -> 200 {source:live, provider:'Twelve Data', quotes:[AUD/USD,AUD/EUR,AUD/GBP] all numeric, candles: 32 rows, timestamps ascending}. Cross-checked same contract on public preview via curl: source=live, provider='Twelve Data', 3 quotes present."
+    },
+    {
+      "criterion": "Quota-aware caching is active",
+      "name": "test_tscheck_market_overview_caching.py::test_market_overview_caches_snapshot_within_60_seconds",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "Two immediate GET /api/market/overview calls returned identical as_of/quotes (cached snapshot); a third call remained responsive (<5s)."
+    },
+    {
+      "criterion": "Fallback behavior is explicit and contract-safe",
+      "name": "test_tscheck_market_overview_fallback.py::test_fallback_market_contract_is_explicit_and_safe",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "Exercised the deterministic _fallback_market() helper directly (no app/DB import, no mocking) since the live server currently has a working key and a genuine 429/outage cannot be forced over HTTP without restarting it with different credentials. Verified source=fallback, provider='Indicative fallback', 3 quotes, >=4 candles, non-empty warning text."
+    },
+    {
+      "criterion": "The hero visibly uses live provider data",
+      "name": "hero-live-market-data",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "hero-market-source badge reads 'LIVE · TWELVE DATA'; dashboard-cashflow-value matched the live AUD/EUR rate from /api/market/overview, then updated to the exact AUD/GBP and AUD/USD rates on tab clicks; rate-card-AUD-USD/EUR/GBP all visible in the live rate strip."
+    },
+    {
+      "criterion": "The 15-minute intraday chart is interactive",
+      "name": "chart-ranges-interactive-responsive",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "2H/4H/6H/1D toggles each received the active class and the chart svg stayed visible at 1440px and 375px; scrollWidth-clientWidth<=1 at both breakpoints; chart bounding box stayed within the 375px viewport."
+    },
+    {
+      "criterion": "Provider key and host are not exposed to the browser",
+      "name": "no-provider-key-exposed-preview",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Run against public preview URL. Captured every network request: zero targeted api.twelvedata.com; only relative /api/market/overview was called; page HTML and every served <script src> body scanned and contained no 'api.twelvedata.com' string (API key itself never printed per instructions)."
+    },
+    {
+      "criterion": "Live data integration does not regress responsive UI",
+      "name": "mobile-live-market-no-regression",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At 375x812: source badge, currency tabs, spot quote, and chart all visible and within viewport bounds (scrollWidth-clientWidth<=1); hero spot value sits below the sticky header's bottom edge; cookie-banner/WhatsApp rects do not intersect when both present; zero failed /api requests and zero non-benign console errors captured."
+    }
+  ],
+  "bugs": [],
+  "notes": [
+    {
+      "criterion": "Fallback behavior is explicit and contract-safe",
+      "note": "Could not force a genuine Twelve Data outage/429 against the live running backend over HTTP (the configured key is currently healthy, and restarting the server with different env is out of scope for a test artifact). Validated the fallback contract by exercising the pure _fallback_market() function directly instead of mocking the DB or importing the FastAPI app -- this is a contract test, not an end-to-end provider-failure simulation."
+    }
+  ],
+  "action_items": [],
+  "retest_needed": false
+}

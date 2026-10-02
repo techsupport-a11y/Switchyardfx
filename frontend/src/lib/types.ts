@@ -11,6 +11,26 @@ export interface FxRatesResponse {
   rates: FxRate[];
 }
 
+export interface MarketQuote {
+  pair: string;
+  rate: number;
+  change: number;
+}
+
+export interface MarketCandle {
+  timestamp: string;
+  close: number;
+}
+
+export interface MarketOverviewResponse {
+  source: "live" | "fallback";
+  provider: "Twelve Data" | "Indicative fallback";
+  as_of: string;
+  quotes: MarketQuote[];
+  candles: MarketCandle[];
+  warning: string | null;
+}
+
 export type SubmissionKind = "contact" | "newsletter" | "hedge-guide";
 
 export interface SubmissionResponse {

@@ -26,6 +26,7 @@ VITE_DATA_MODE=api
 
 The only frontend integration boundary is `src/services/switchyard.ts`. It currently expects:
 
+- `GET /api/market/overview` — server-proxied Twelve Data quotes and 15-minute AUD/USD candles, with an indicative fallback
 - `GET /api/fx/rates?base=AUD&quotes=USD,EUR,GBP`
 - `POST /api/submissions`
 
@@ -41,3 +42,5 @@ The corresponding hand-written TypeScript request/response contracts are in `src
 - `src/lib/api.ts` — typed HTTP transport over `/api`
 
 No backend secrets, database code, or server runtime is required in this folder.
+
+The Twelve Data key must remain in the backend environment as `TWELVE_DATA_API_KEY`. Never add it to a `VITE_*` variable or browser code.

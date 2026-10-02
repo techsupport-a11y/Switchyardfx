@@ -1,11 +1,14 @@
+import asyncio
 import logging
+import os
+import time
 from datetime import datetime, timezone
 
 import httpx
 from fastapi import APIRouter, HTTPException, Query
 
 from lib.db import db
-from models.switchyard import FxRate, FxRatesResponse, SubmissionCreate, SubmissionResponse
+from models.switchyard import FxRate, FxRatesResponse, MarketCandle, MarketOverviewResponse, MarketQuote, SubmissionCreate, SubmissionResponse
 
 
 router = APIRouter()
@@ -16,6 +19,103 @@ FALLBACK_RATES = {
     "EUR": (0.6018, -0.27),
     "GBP": (0.5129, 0.92),
 }
+TWELVE_DATA_URL = "https://api.twelvedata.com"
+MARKET_SYMBOLS = ("AUD/USD", "AUD/EUR", "AUD/GBP")
+FALLBACK_CANDLES = [
+    0.6504, 0.6508, 0.6502, 0.6511, 0.6515, 0.6509, 0.6518, 0.6522,
+    0.6517, 0.6525, 0.6521, 0.6516, 0.6528, 0.6531, 0.6526, 0.6534,
+    0.6530, 0.6524, 0.6519, 0.6527, 0.6535, 0.6532, 0.6528, 0.6538,
+    0.6541, 0.6536, 0.6544, 0.6540, 0.6547, 0.6543, 0.6549, 0.6552,
+]
+_market_cache: tuple[float, MarketOverviewResponse] | None = None
+
+
+def _fallback_market(warning: str) -> MarketOverviewResponse:
+    now = datetime.now(timezone.utc)
+    quotes = [
+        MarketQuote(pair=f"AUD/{quote}", rate=rate, change=change)
+        for quote, (rate, change) in FALLBACK_RATES.items()
+    ]
+    candles = [
+        MarketCandle(timestamp=f"{index * 15:04d}", close=value)
+        for index, value in enumerate(FALLBACK_CANDLES)
+    ]
+    return MarketOverviewResponse(
+        source="fallback",
+        provider="Indicative fallback",
+        as_of=now.isoformat(),
+        quotes=quotes,
+        candles=candles,
+        warning=warning,
+    )
+
+
+def _parse_quote_payload(payload: dict) -> list[MarketQuote]:
+    quotes: list[MarketQuote] = []
+    for symbol in MARKET_SYMBOLS:
+        row = payload.get(symbol)
+        if not isinstance(row, dict):
+            continue
+        price = row.get("close") or row.get("price")
+        percent_change = row.get("percent_change") or row.get("change") or 0
+        if price is not None:
+            quotes.append(MarketQuote(pair=symbol, rate=float(price), change=float(percent_change)))
+    return quotes
+
+
+@router.get("/market/overview", response_model=MarketOverviewResponse)
+async def get_market_overview():
+    global _market_cache
+    now_monotonic = time.monotonic()
+    if _market_cache and now_monotonic - _market_cache[0] < 60:
+        return _market_cache[1]
+
+    api_key = os.environ.get("TWELVE_DATA_API_KEY", "").strip()
+    if not api_key:
+        return _fallback_market("Live market key is not configured; showing indicative values.")
+
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as http:
+            quote_response, chart_response = await asyncio.gather(
+                http.get(
+                    f"{TWELVE_DATA_URL}/quote",
+                    params={"symbol": ",".join(MARKET_SYMBOLS), "dp": 6, "apikey": api_key},
+                ),
+                http.get(
+                    f"{TWELVE_DATA_URL}/time_series",
+                    params={"symbol": "AUD/USD", "interval": "15min", "outputsize": 32, "order": "ASC", "timezone": "UTC", "apikey": api_key},
+                ),
+            )
+        if quote_response.status_code == 429 or chart_response.status_code == 429:
+            result = _fallback_market("Twelve Data rate limit reached; showing indicative values.")
+        else:
+            quote_response.raise_for_status()
+            chart_response.raise_for_status()
+            quote_payload = quote_response.json()
+            chart_payload = chart_response.json()
+            if quote_payload.get("status") == "error" or chart_payload.get("status") == "error":
+                raise ValueError("provider returned an error response")
+            quotes = _parse_quote_payload(quote_payload)
+            candles = [
+                MarketCandle(timestamp=str(row["datetime"]), close=float(row["close"]))
+                for row in chart_payload.get("values", [])
+                if isinstance(row, dict) and row.get("datetime") and row.get("close")
+            ]
+            if len(quotes) != len(MARKET_SYMBOLS) or len(candles) < 4:
+                raise ValueError("provider response was incomplete")
+            result = MarketOverviewResponse(
+                source="live",
+                provider="Twelve Data",
+                as_of=datetime.now(timezone.utc).isoformat(),
+                quotes=quotes,
+                candles=candles,
+            )
+    except (httpx.HTTPError, ValueError, TypeError, KeyError) as exc:
+        logger.info("Twelve Data unavailable; using indicative market fallback (%s)", type(exc).__name__)
+        result = _fallback_market("Live market data is temporarily unavailable; showing indicative values.")
+
+    _market_cache = (now_monotonic, result)
+    return result
 
 
 @router.get("/fx/rates", response_model=FxRatesResponse)

@@ -1,6 +1,6 @@
 import { apiGet, apiPost } from "@/lib/api";
-import { createMockSubmission, getMockFxRates } from "@/data/mockSwitchyard";
-import type { FxRatesResponse, SubmissionPayload, SubmissionResponse } from "@/lib/types";
+import { createMockSubmission, getMockFxRates, getMockMarketOverview } from "@/data/mockSwitchyard";
+import type { FxRatesResponse, MarketOverviewResponse, SubmissionPayload, SubmissionResponse } from "@/lib/types";
 
 export type SwitchyardDataMode = "mock" | "api";
 
@@ -10,6 +10,14 @@ export const SWITCHYARD_DATA_MODE: SwitchyardDataMode =
   import.meta.env.VITE_DATA_MODE === "api" ? "api" : "mock";
 
 export const switchyardService = {
+  async getMarketOverview(): Promise<MarketOverviewResponse> {
+    try {
+      return await apiGet<MarketOverviewResponse>("/market/overview");
+    } catch {
+      return getMockMarketOverview();
+    }
+  },
+
   getFxRates(): Promise<FxRatesResponse> {
     if (SWITCHYARD_DATA_MODE === "mock") return getMockFxRates();
     return apiGet<FxRatesResponse>("/fx/rates?base=AUD&quotes=USD,EUR,GBP");
