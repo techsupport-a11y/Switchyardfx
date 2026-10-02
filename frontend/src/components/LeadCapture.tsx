@@ -1,15 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiPost } from "@/lib/api";
 import type { SubmissionKind, SubmissionPayload, SubmissionResponse } from "@/lib/types";
+import { switchyardService } from "@/services/switchyard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 function submitLead(payload: SubmissionPayload) {
-  return apiPost<SubmissionResponse>("/submissions", payload);
+  return switchyardService.createSubmission(payload);
 }
 
 export function LeadForm({ kind, compact = false, showVolume = false, showNewsletterFields = false }: { kind: SubmissionKind; compact?: boolean; showVolume?: boolean; showNewsletterFields?: boolean }) {

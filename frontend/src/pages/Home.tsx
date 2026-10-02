@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, ArrowUpRight, Check, ChevronRight, CircleDollarSign, FileText, Gauge, Globe2, HandCoins, LineChart, LockKeyhole, ShieldCheck, Sparkles, Target, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { apiGet } from "@/lib/api";
 import type { FxRate, FxRatesResponse } from "@/lib/types";
+import { switchyardService } from "@/services/switchyard";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { GuideDialog } from "@/components/LeadCapture";
 import { Reveal, SectionLabel } from "@/components/SiteShell";
@@ -20,7 +20,7 @@ export default function Home() {
   const [currency, setCurrency] = useState<keyof typeof dashboardData>("EUR");
   const [horizon, setHorizon] = useState<keyof typeof chartData>("6M");
   const [guideOpen, setGuideOpen] = useState(false);
-  const ratesQuery = useQuery({ queryKey: ["fx-rates", "AUD"], queryFn: () => apiGet<FxRatesResponse>("/fx/rates?base=AUD&quotes=USD,EUR,GBP"), retry: false, staleTime: 1000 * 60 * 10 });
+  const ratesQuery = useQuery({ queryKey: ["fx-rates", "AUD"], queryFn: switchyardService.getFxRates, retry: false, staleTime: 1000 * 60 * 10 });
   const rates = ratesQuery.data?.rates ?? fallbackRates;
   const current = dashboardData[currency];
   const points = chartData[horizon];

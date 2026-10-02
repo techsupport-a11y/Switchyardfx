@@ -19,3 +19,9 @@ No real authentication or seeded accounts. `/login` is intentionally a non-block
 
 ## Integrations
 Frankfurter public FX API via backend with fallback; hidden Google Translate bridge; external Cal.com and WhatsApp links. No private third-party credentials are required.
+
+## Frontend handoff mode
+- The `frontend/` directory is a standalone repository-ready package.
+- `VITE_DATA_MODE=mock` is the default and uses isolated interactive demo behavior from `src/data/mockSwitchyard.ts`.
+- `VITE_DATA_MODE=api` routes all data through `src/services/switchyard.ts`, currently matching `GET /api/fx/rates` and `POST /api/submissions`.
+- Backend replacement requires editing the service adapter and mirrored interfaces only; pages and components do not call endpoints directly.
