@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { SubmissionKind, SubmissionPayload, SubmissionResponse } from "@/lib/types";
+import type { SubmissionKind, SubmissionPayload } from "@/lib/types";
+import { HEDGE_POLICY_PDF } from "@/lib/siteLinks";
 import { switchyardService } from "@/services/switchyard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -36,7 +37,7 @@ export function LeadForm({ kind, compact = false, showVolume = false, showNewsle
     mutation.mutate(payload);
   }
 
-  if (sent) return <div className="rounded-2xl border border-[#A8C5BA]/30 bg-[#A8C5BA]/10 p-6" data-testid={`${kind}-form-success`}><p className="font-bold text-[#A8C5BA]">Request received.</p><p className="mt-2 text-sm text-white/70">Our team will be in touch shortly.</p></div>;
+  if (sent) return <div className="rounded-2xl border border-[#A8C5BA]/30 bg-[#A8C5BA]/10 p-6" data-testid={`${kind}-form-success`}><p className="font-bold text-[#A8C5BA]">Request received.</p><p className="mt-2 text-sm text-white/70">Our team will be in touch shortly.</p>{kind === "hedge-guide" && <a href={HEDGE_POLICY_PDF} download className="mt-4 inline-flex rounded-full bg-[#2D6A4F] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#3d8163]" data-testid="hedge-guide-download-link">Download the guide (PDF)</a>}</div>;
 
   return (
     <form onSubmit={onSubmit} className={`grid gap-4 ${compact ? "sm:grid-cols-[1fr_auto]" : "sm:grid-cols-2"}`} noValidate data-testid={`${kind}-form`}>
