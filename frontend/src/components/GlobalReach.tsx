@@ -1,9 +1,8 @@
 import type { ComponentType, CSSProperties, SVGProps } from "react";
-import { useQuery } from "@tanstack/react-query";
 import * as Flags from "country-flag-icons/react/3x2";
 import { FlagGlobe, type FlagGlobeMarker } from "@/components/ui/flag-globe";
 import { Reveal, SectionLabel } from "@/components/SiteShell";
-import { switchyardService } from "@/services/switchyard";
+import { useMarketOverview } from "@/lib/useMarketOverview";
 
 // The currencies tracked on the original switchyardfx.com.au market chart, each pinned at its
 // issuer. The euro has no single country, so it sits at Brussels under the EU flag.
@@ -33,7 +32,7 @@ const darkTokens = {
 
 export default function GlobalReach() {
   // Shares the hero's live market query, so no extra request is made.
-  const market = useQuery({ queryKey: ["market-overview"], queryFn: switchyardService.getMarketOverview, retry: false, staleTime: 60_000, refetchInterval: 60_000 });
+  const market = useMarketOverview();
   const quotes = market.data?.quotes ?? [];
   const live = market.data?.source === "live";
 

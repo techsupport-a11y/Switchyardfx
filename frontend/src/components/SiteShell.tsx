@@ -47,15 +47,17 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   </div>;
 }
 
+// Home is active only on "/"; every other link also covers its sub-pages.
+const isActivePath = (pathname: string, href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
 // Desktop nav: a soft pill glides to whichever link is hovered or focused, and a dot marks
 // the current page.
 function HeaderNav({ pathname }: { pathname: string }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
-  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   return <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation" onMouseLeave={() => setHovered(null)} onBlur={() => setHovered(null)}>
     {navLinks.map(([name, href]) => {
-      const active = isActive(href);
+      const active = isActivePath(pathname, href);
       return <Link key={href} to={href} aria-current={active ? "page" : undefined} onMouseEnter={() => setHovered(href)} onFocus={() => setHovered(href)} className={`relative rounded-full px-3.5 py-2 text-sm transition-colors ${active || hovered === href ? "text-white" : "text-white/70"}`} data-testid={`header-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>
         {hovered === href && <motion.span layoutId="header-nav-hover" className="absolute inset-0 -z-10 rounded-full bg-white/10" transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }} />}
         {name}
@@ -80,7 +82,7 @@ function Header() {
       <div className="hidden items-center gap-3 lg:flex"><LanguageSwitcher /><Link to="/login" className={buttonVariants({ variant: "outline", size: "sm" }) + " rounded-full border-white/20 bg-transparent text-white transition-colors hover:border-[#A8C5BA]/60 hover:bg-white/10 hover:text-white"} data-testid="header-login-link">Login</Link><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "sm" }) + " group rounded-full bg-[#2D6A4F] text-white transition-[transform,background-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:bg-[#3d8163] hover:shadow-[0_8px_24px_rgba(110,231,168,.25)]"} data-testid="header-book-call-link">Book a Call <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></a></div>
       <button type="button" onClick={() => setMenuOpen(true)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-white lg:hidden" aria-label="Open menu" data-testid="mobile-menu-open-button"><Menu size={20} /></button>
     </div></div>
-    <AnimatePresence>{menuOpen && <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 24 }} className="fixed inset-0 z-50 flex flex-col bg-[#12261F] p-6 lg:hidden" data-testid="mobile-menu"><div className="flex items-center justify-between"><span className="text-lg font-bold text-white">SwitchYard</span><button type="button" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-white" aria-label="Close menu" data-testid="mobile-menu-close-button"><X size={20} /></button></div><nav className="mt-14 grid gap-5">{navLinks.map(([name, href]) => <Link key={href} to={href} aria-current={(href === "/" ? location.pathname === "/" : location.pathname.startsWith(href)) ? "page" : undefined} className={`text-3xl font-bold transition-colors ${(href === "/" ? location.pathname === "/" : location.pathname.startsWith(href)) ? "text-[#A8C5BA]" : "text-white hover:text-[#A8C5BA]"}`} data-testid={`mobile-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>{name}</Link>)}<Link to="/login" className="text-3xl font-bold text-white" data-testid="mobile-nav-login">Login</Link></nav><div className="mt-auto grid gap-4"><LanguageSwitcher mobile /><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "lg" }) + " justify-center rounded-full bg-[#A8C5BA] text-[#12261F]"} data-testid="mobile-book-call-link">Book a Call <ArrowUpRight size={18} /></a></div></motion.div>}</AnimatePresence>
+    <AnimatePresence>{menuOpen && <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 24 }} className="fixed inset-0 z-50 flex flex-col bg-[#12261F] p-6 lg:hidden" data-testid="mobile-menu"><div className="flex items-center justify-between"><span className="text-lg font-bold text-white">SwitchYard</span><button type="button" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-white" aria-label="Close menu" data-testid="mobile-menu-close-button"><X size={20} /></button></div><nav className="mt-14 grid gap-5">{navLinks.map(([name, href]) => <Link key={href} to={href} aria-current={isActivePath(location.pathname, href) ? "page" : undefined} className={`text-3xl font-bold transition-colors ${isActivePath(location.pathname, href) ? "text-[#A8C5BA]" : "text-white hover:text-[#A8C5BA]"}`} data-testid={`mobile-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>{name}</Link>)}<Link to="/login" className="text-3xl font-bold text-white" data-testid="mobile-nav-login">Login</Link></nav><div className="mt-auto grid gap-4"><LanguageSwitcher mobile /><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "lg" }) + " justify-center rounded-full bg-[#A8C5BA] text-[#12261F]"} data-testid="mobile-book-call-link">Book a Call <ArrowUpRight size={18} /></a></div></motion.div>}</AnimatePresence>
   </header>;
 }
 

@@ -126,6 +126,19 @@ html[dir="rtl"] { text-align: right; }
 html[dir="rtl"] .lucide { transform: scaleX(-1); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 
+/* Home hero glow: a slow breathing scale/opacity loop (9s, ease-in-out per segment). It runs as a
+   CSS animation so the compositor drives it instead of a per-frame JS style write. Like the
+   Motion animation it replaces, it keeps running under reduced motion. */
+@keyframes hero-glow {
+  0%, 100% { transform: scale(1); opacity: .45; }
+  50% { transform: scale(1.12); opacity: .7; }
+}
+.hero-glow { animation: hero-glow 9s cubic-bezier(.42, 0, .58, 1) infinite; }
+@media (prefers-reduced-motion: reduce) { .hero-glow { animation-duration: 9s !important; animation-iteration-count: infinite !important; } }
+
+/* The flag globe's twinkling stars pause while the globe is off screen (they are not visible then). */
+[data-globe-offscreen] .animate-pulse { animation-play-state: paused; }
+
 /* Login page: a fine olive dot grid on white that fades out toward the edges. */
 .login-dots {
   background-image: radial-gradient(rgba(112, 130, 56, .55) 1.2px, transparent 1.6px);

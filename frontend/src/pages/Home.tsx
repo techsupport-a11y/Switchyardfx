@@ -1,10 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState, type MouseEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { ArrowRight, ArrowUpRight, Check, ChevronRight, CircleDollarSign, FileText, Gauge, Globe2, HandCoins, Layers3, LineChart, LockKeyhole, Radar, ShieldCheck, Sparkles, Target, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { FxRate, MarketQuote } from "@/lib/types";
-import { switchyardService } from "@/services/switchyard";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { GuideDialog } from "@/components/LeadCapture";
 import { Reveal, SectionLabel } from "@/components/SiteShell";
@@ -13,6 +11,16 @@ import FaqSection from "@/components/FaqSection";
 // The globe pulls in WebGL and every flag, so it loads as its own chunk below the fold.
 const GlobalReach = lazy(() => import("@/components/GlobalReach"));
 import { BOOKING_URL } from "@/lib/siteLinks";
+import { useMarketOverview } from "@/lib/useMarketOverview";
+import { useAfterIdle } from "@/lib/defer";
+
+// The globe (WebGL, every flag) starts loading at the first idle moment after the first paint
+// instead of during it; until then the same placeholder shows.
+function GlobalReachAfterIdle() {
+  const idle = useAfterIdle();
+  const placeholder = <section className="min-h-[640px] bg-[#12261F]" aria-hidden="true" />;
+  return idle ? <Suspense fallback={placeholder}><GlobalReach /></Suspense> : placeholder;
+}
 
 const fallbackRates = [
   { pair: "AUD/USD", rate: 0.6512, change: 0.48, source: "fallback" as const },
@@ -34,7 +42,7 @@ export default function Home() {
   const [currency, setCurrency] = useState<keyof typeof dashboardData>("EUR");
   const [horizon, setHorizon] = useState<keyof typeof chartRanges>("4H");
   const [guideOpen, setGuideOpen] = useState(false);
-  const marketQuery = useQuery({ queryKey: ["market-overview"], queryFn: switchyardService.getMarketOverview, retry: false, staleTime: 60_000, refetchInterval: 60_000 });
+  const marketQuery = useMarketOverview();
   const rates: FxRate[] = (marketQuery.data?.quotes ?? fallbackRates).map((quote) => ({ ...quote, source: marketQuery.data?.source ?? "fallback" }));
   const current = dashboardData[currency];
   const quote = (marketQuery.data?.quotes ?? fallbackRates).find((item) => item.pair === `AUD/${currency}`) ?? fallbackRates[0];
@@ -44,7 +52,7 @@ export default function Home() {
   return <>
     <section className="relative isolate overflow-hidden bg-[#12261F] text-white" data-testid="home-hero-section">
       <div className="hero-grid absolute inset-0 opacity-60" />
-      <motion.div className="absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#2D6A4F]/35 blur-[110px]" animate={{ scale: [1, 1.12, 1], opacity: [0.45, 0.7, 0.45] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
+      <div className="hero-glow absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#2D6A4F]/35 blur-[110px]" />
       <div className="absolute -bottom-24 left-[12%] h-72 w-72 rounded-full bg-[#A8C5BA]/10 blur-[90px]" />
       <div className="relative mx-auto grid min-h-[82svh] max-w-7xl grid-cols-[minmax(0,1fr)] gap-12 px-5 pb-14 pt-28 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:px-8 lg:pb-14 lg:pt-28">
         <motion.div className="relative z-10 min-w-0" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
@@ -63,7 +71,7 @@ export default function Home() {
     <CfoOutcomes />
     <MetricBand />
     <section className="bg-[#F5F7F6] px-5 py-20 lg:px-8 lg:py-28" data-testid="solutions-section"><div className="mx-auto max-w-7xl"><Reveal from="left"><SectionLabel>Corporate FX solutions</SectionLabel><div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end"><h2 className="max-w-2xl text-4xl font-bold leading-tight tracking-[-0.04em] sm:text-5xl" data-testid="solutions-heading">Manage your finances<br /><span className="text-[#52796F]">with ease.</span></h2><p className="max-w-md text-[#4A5A55]" data-testid="solutions-description">Comprehensive treasury services designed for mid-market enterprises managing multi-currency exposure.</p></div></Reveal><div className="mt-12 grid gap-4 md:grid-cols-3">{[[CircleDollarSign, "Competitive rates with full transparency", "Simple to use and enhanced reporting to help you make smarter decisions."], [Globe2, "24/7 online platform access", "Robust and fully secure payment infrastructure to enable reliable transfers across the globe."], [Users, "Dedicated account manager", "Transact seamlessly using the online platform or with the help of your dedicated relationship manager."]].map(([Icon, title, text], index) => <Reveal key={title as string} delay={index * 0.07} className="h-full"><div className="group flex h-full flex-col rounded-2xl border border-[#DCE5E1] bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl" data-testid={`solution-card-${index + 1}`}><div className="mb-14 grid h-12 w-12 place-items-center rounded-xl bg-[#E8EEEB] text-[#2D6A4F] transition-colors group-hover:bg-[#2D6A4F] group-hover:text-white"><Icon size={23} /></div><h3 className="text-xl font-bold md:min-h-[5.25rem] lg:min-h-[3.5rem]" data-testid={`solution-title-${index + 1}`}>{title as string}</h3><p className="mt-3 text-sm leading-6 text-[#4A5A55]" data-testid={`solution-copy-${index + 1}`}>{text as string}</p><div className="mt-auto pt-7"><ChevronRight size={20} className="text-[#2D6A4F] transition-transform group-hover:translate-x-1" /></div></div></Reveal>)}</div></div></section>
-    <Suspense fallback={<section className="min-h-[640px] bg-[#12261F]" aria-hidden="true" />}><GlobalReach /></Suspense>
+    <GlobalReachAfterIdle />
     <section className="bg-white px-5 py-20 lg:px-8 lg:py-28" data-testid="advisory-section"><div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center"><Reveal from="left"><div className="relative overflow-hidden rounded-[2rem] bg-[#E8EEEB] p-8 sm:p-12"><div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-[#A8C5BA]/50 blur-2xl" /><div className="relative"><div className="flex items-center justify-between"><span className="rounded-full bg-white px-3 py-2 text-xs font-bold text-[#2D6A4F]">MARKET INTELLIGENCE</span><LineChart className="text-[#52796F]" /></div><div className="mt-20 grid grid-cols-6 items-end gap-3"><div className="h-14 rounded-t-lg bg-[#A8C5BA]" /><div className="h-24 rounded-t-lg bg-[#52796F]" /><div className="h-20 rounded-t-lg bg-[#2D6A4F]" /><div className="h-36 rounded-t-lg bg-[#12261F]" /><div className="h-28 rounded-t-lg bg-[#52796F]" /><div className="h-44 rounded-t-lg bg-[#2D6A4F]" /></div><div className="mt-5 flex justify-between text-xs text-[#4A5A55]"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div></div></div></Reveal><Reveal from="right" delay={0.1}><SectionLabel>Advisory, not guesswork</SectionLabel><h2 className="max-w-xl text-4xl font-bold leading-tight tracking-[-0.04em] sm:text-5xl" data-testid="advisory-heading">Grow your business with <span className="text-[#52796F]">expert FX advisory.</span></h2><p className="mt-6 max-w-lg leading-7 text-[#4A5A55]" data-testid="advisory-description">We have helped thousands of businesses trade and thrive globally. Get in touch with our team to learn how we can help you succeed beyond borders.</p><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "lg" }) + " mt-8 rounded-full bg-[#2D6A4F] text-white hover:bg-[#3d8163]"} data-testid="advisory-book-button">Book a 15-min call <ArrowUpRight size={17} /></a></Reveal></div></section>
     <ExposureScenarios />
     <section className="bg-[#F5F7F6] px-5 py-20 lg:px-8 lg:py-24" data-testid="lending-section"><div className="mx-auto grid max-w-7xl gap-8 rounded-[2rem] bg-[#12261F] p-8 text-white sm:p-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end"><div><SectionLabel>Business lending</SectionLabel><h2 className="max-w-2xl text-4xl font-bold leading-tight tracking-[-0.04em] sm:text-5xl" data-testid="lending-heading">Flexible lending solutions to help you realise your ambitions.</h2></div><div><p className="text-white/60" data-testid="lending-description">Access a fast and hassle-free trade finance facility when needed to fund your purchases.</p><Link to="/contact" className="mt-7 inline-flex items-center gap-2 font-bold text-[#A8C5BA] hover:text-white" data-testid="lending-explore-link">Explore more <ArrowRight size={16} /></Link></div></div></section>

@@ -621,6 +621,8 @@ export function FlagGlobe({
     const observer = new IntersectionObserver((entries) => {
       const entry = entries[entries.length - 1];
       s.onScreen = entry?.isIntersecting ?? true;
+      // Lets CSS pause the decorative star twinkle while nothing of the globe is visible.
+      root.toggleAttribute("data-globe-offscreen", !s.onScreen);
       kickRef.current();
     });
     onMotion();

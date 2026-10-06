@@ -128,6 +128,8 @@ export default function GlyphPortal({
     let W = 1, H = 1, travel = 1, startScale = 1, endScale = 1;
     let center = { x: 0, y: 0 }, target: Ink | null = null;
     let lastProgress = -1;
+    // Inputs of the last paint; a scroll frame with identical inputs writes nothing.
+    let lastPaint = "";
     let candidates: Ink[] = [], letters: Letter[] = [];
     let choosing = false;
     let bounds = { x: 0, y: 0, width: 1, height: 1 };
@@ -207,6 +209,9 @@ export default function GlyphPortal({
     const paint = (progress: number) => {
       const isStatic = motion.matches || !browserFrameSeen || stalled || !target;
       const p = isStatic ? 0 : progress;
+      const paintKey = `${p}|${isStatic}|${target?.index}|${W}|${H}|${startScale}|${interactive}`;
+      if (paintKey === lastPaint) return;
+      lastPaint = paintKey;
       const t = clamp(p / 0.78);
       const eased = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
       const scale = Math.exp(Math.log(startScale) + Math.log(endScale / startScale) * eased);
@@ -239,6 +244,7 @@ export default function GlyphPortal({
 
     const layout = () => {
       if (!section.clientWidth) return;
+      lastPaint = "";
       W = pin.clientWidth;
       // A 100svh probe keeps browser chrome from continually changing the scroll distance.
       const smallViewport = section.querySelector<HTMLElement>("[data-gp-viewport]")!.offsetHeight;
