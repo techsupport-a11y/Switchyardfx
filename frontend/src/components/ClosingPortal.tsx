@@ -43,7 +43,7 @@ function Content() {
   </div>;
 }
 
-// White field with the interactive olive kinetic grid: dots, and grid lines that warp toward
+// White field with the interactive olive kinetic grid: plain lines that warp toward
 // the pointer and ripple on click.
 function BrandField() {
   return <>

@@ -24,7 +24,7 @@ interface Ripple {
 }
 
 type Rgba = { r: number; g: number; b: number; a: number };
-type Palette = { bg: string | null; lineBase: Rgba; lineActive: Rgba; nodeBase: Rgba; nodeActive: Rgba; dot: string; glow: string; ripple: string };
+type Palette = { bg: string | null; lineBase: Rgba; lineActive: Rgba; nodeBase: Rgba; nodeActive: Rgba; dot: string | null; glow: string; ripple: string };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -72,9 +72,10 @@ const PALETTES: Record<"default" | "monochrome" | "brand" | "olive", Palette> = 
     bg: null,
     lineBase: { r: 112, g: 130, b: 56, a: 0.12 },
     lineActive: { r: 92, g: 110, b: 40, a: 0.8 },
-    nodeBase: { r: 112, g: 130, b: 56, a: 0.4 },
+    // Lines only: no dot texture, and intersection dots appear only near the pointer.
+    nodeBase: { r: 82, g: 100, b: 32, a: 0 },
     nodeActive: { r: 82, g: 100, b: 32, a: 1.0 },
-    dot: "rgba(112,130,56,0.35)",
+    dot: null,
     glow: "112,130,56",
     ripple: "112,130,56",
   },
@@ -186,12 +187,14 @@ export default function KineticGrid({
       }
 
       // Static background dot texture
-      ctx.fillStyle = theme.dot;
-      for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
-        for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
-          ctx.beginPath();
-          ctx.arc(x, y, globalColor === "olive" ? 1.1 : 0.7, 0, Math.PI * 2);
-          ctx.fill();
+      if (theme.dot) {
+        ctx.fillStyle = theme.dot;
+        for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
+          for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.7, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
 
@@ -263,7 +266,8 @@ export default function KineticGrid({
             ctx.fill();
           }
 
-          // Node fill
+          // Node fill (skipped when it would be invisible)
+          if (theme.nodeBase.a === 0 && t < 0.01) continue;
           ctx.beginPath();
           ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
           ctx.fillStyle = lerpColor(theme.nodeBase, theme.nodeActive, t);
