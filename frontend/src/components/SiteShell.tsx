@@ -13,9 +13,18 @@ import { getStoredLanguage, installGoogleTranslate, LANGUAGES, setDocumentLangua
 
 const navLinks = [["Home", "/"], ["About", "/about"], ["Services", "/services"], ["Market Insights", "/insights"], ["Contact", "/contact"]];
 
-export function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+// Where a block slides in from as it scrolls into view.
+const REVEAL_FROM = {
+  left: { x: -56, y: 0, scale: 1 },
+  right: { x: 56, y: 0, scale: 1 },
+  top: { x: 0, y: -36, scale: 1 },
+  bottom: { x: 0, y: 36, scale: 1 },
+  scale: { x: 0, y: 0, scale: 0.92 },
+} as const;
+
+export function Reveal({ children, className = "", delay = 0, from = "bottom" }: { children: ReactNode; className?: string; delay?: number; from?: keyof typeof REVEAL_FROM }) {
   const reducedMotion = useReducedMotion();
-  return <motion.div className={className} initial={reducedMotion ? false : { opacity: 0, y: 28, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true, margin: "-70px" }} transition={{ duration: reducedMotion ? 0 : 0.7, delay, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
+  return <motion.div className={className} initial={reducedMotion ? false : { opacity: 0, ...REVEAL_FROM[from] }} whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }} viewport={{ once: true, margin: "-70px" }} transition={{ duration: reducedMotion ? 0 : 0.75, delay, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) { const id = typeof children === "string" ? children.toLowerCase().replaceAll(" ", "-").replaceAll("’", "") : "label"; return <p className="section-label mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[#52796F]" data-testid={`section-label-${id}`}>{children}</p>; }
