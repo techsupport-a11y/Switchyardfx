@@ -120,6 +120,8 @@
 body { top: 0 !important; }
 #google_translate_element { position: fixed; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; z-index: -1; }
 .goog-te-banner-frame.skiptranslate, .goog-te-balloon-frame, #goog-gt-tt, .goog-tooltip { display: none !important; }
+/* Google Translate's top "Translated into …" bar (current and older markup). The site's own switcher replaces it. */
+body > .skiptranslate, iframe.skiptranslate, .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
 html[dir="rtl"] { text-align: right; }
 html[dir="rtl"] .lucide { transform: scaleX(-1); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
