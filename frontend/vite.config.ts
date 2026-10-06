@@ -1,7 +1,9 @@
+import fs from "node:fs";
 import path from "node:path";
-import { defineConfig, type UserConfig } from "vite";
+import { defineConfig, type Plugin, type UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { renderHead, renderSitemap, ROUTES } from "./src/lib/seo.ts";
 
 // Supervisor exports DISABLE_HOT_RELOAD=true when the platform sets ENABLE_RELOAD=false.
 const hotReloadDisabled = process.env.DISABLE_HOT_RELOAD === "true";
@@ -12,12 +14,39 @@ if (!hotReloadDisabled) {
   process.env.CHOKIDAR_USEPOLLING = "true";
 }
 
+// Fills the home page <head> from src/lib/seo.ts, then after the build writes a copy of
+// index.html per route (dist/about/index.html, ...) with that page's title, description,
+// canonical, social tags and structured data, so crawlers and link previews that don't run
+// JavaScript still see the right page. Also writes sitemap.xml.
+function seoPages(): Plugin {
+  const SEO_BLOCK = /<!-- seo:start -->[\s\S]*?<!-- seo:end -->/;
+  let outDir = "dist";
+  return {
+    name: "switchyard-seo-pages",
+    configResolved(config) { outDir = path.resolve(config.root, config.build.outDir); },
+    transformIndexHtml(html) { return html.replace("<!-- seo:head -->", renderHead("/")); },
+    closeBundle() {
+      const indexFile = path.join(outDir, "index.html");
+      if (!fs.existsSync(indexFile)) return;
+      const html = fs.readFileSync(indexFile, "utf8");
+      for (const route of Object.keys(ROUTES)) {
+        if (route === "/") continue;
+        const file = path.join(outDir, route, "index.html");
+        fs.mkdirSync(path.dirname(file), { recursive: true });
+        fs.writeFileSync(file, html.replace(SEO_BLOCK, `<!-- seo:start -->\n    ${renderHead(route)}\n    <!-- seo:end -->`));
+      }
+      fs.writeFileSync(path.join(outDir, "sitemap.xml"), renderSitemap(new Date().toISOString().slice(0, 10)));
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig(() => {
   return {
     plugins: [
       react(),
       tailwindcss(),
+      seoPages(),
     ],
     resolve: {
       alias: [

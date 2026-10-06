@@ -9,6 +9,7 @@ import { buttonVariants, Button } from "@/components/ui/button";
 import { GuideDialog } from "@/components/LeadCapture";
 import { Reveal, SectionLabel } from "@/components/SiteShell";
 import ClosingPortal from "@/components/ClosingPortal";
+import FaqSection from "@/components/FaqSection";
 // The globe pulls in WebGL and every flag, so it loads as its own chunk below the fold.
 const GlobalReach = lazy(() => import("@/components/GlobalReach"));
 import { BOOKING_URL } from "@/lib/siteLinks";
@@ -68,6 +69,7 @@ export default function Home() {
     <section className="bg-[#F5F7F6] px-5 py-20 lg:px-8 lg:py-24" data-testid="lending-section"><div className="mx-auto grid max-w-7xl gap-8 rounded-[2rem] bg-[#12261F] p-8 text-white sm:p-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end"><div><SectionLabel>Business lending</SectionLabel><h2 className="max-w-2xl text-4xl font-bold leading-tight tracking-[-0.04em] sm:text-5xl" data-testid="lending-heading">Flexible lending solutions to help you realise your ambitions.</h2></div><div><p className="text-white/60" data-testid="lending-description">Access a fast and hassle-free trade finance facility when needed to fund your purchases.</p><Link to="/contact" className="mt-7 inline-flex items-center gap-2 font-bold text-[#A8C5BA] hover:text-white" data-testid="lending-explore-link">Explore more <ArrowRight size={16} /></Link></div></div></section>
     <HowWeWork />
     <section className="bg-[#12261F] px-5 py-20 text-white lg:px-8 lg:py-24" data-testid="guide-section"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_0.8fr] lg:items-center"><Reveal><SectionLabel>Free resource</SectionLabel><h2 className="max-w-2xl text-4xl font-bold leading-tight tracking-[-0.04em] sm:text-5xl" data-testid="guide-heading">Get the free Hedge Policy Guide.</h2><p className="mt-5 max-w-xl text-white/60" data-testid="guide-description">Download our sample treasury policy template and learn how to build a hedging framework that works for mid-market CFOs.</p><Button onClick={() => setGuideOpen(true)} className="mt-8 h-12 rounded-full bg-[#A8C5BA] px-6 font-bold text-[#12261F] hover:bg-white" data-testid="guide-open-button">Download PDF <ArrowRight size={17} /></Button></Reveal><Reveal delay={0.1}><div className="grid gap-3">{["Policy structure & governance best practices", "Currency pair prioritisation framework", "Reporting & board communication templates"].map((item) => <div key={item} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm" data-testid={`guide-feature-${item.toLowerCase().replaceAll(" ", "-")}`}><div className="grid h-9 w-9 place-items-center rounded-full bg-[#2D6A4F]"><Check size={17} /></div><span className="font-bold">{item}</span></div>)}</div></Reveal></div></section>
+    <FaqSection />
     <ClosingPortal />
     <GuideDialog open={guideOpen} onOpenChange={setGuideOpen} />
   </>;

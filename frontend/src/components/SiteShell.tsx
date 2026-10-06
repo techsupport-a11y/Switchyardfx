@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandMark } from "@/components/BrandMark";
 import LandingIntro from "@/components/LandingIntro";
+import { renderHead, routeMeta } from "@/lib/seo";
 import { BOOKING_URL, EBURY_LEGAL_URL, EMAIL, EMAIL_HREF, PHONE_DISPLAY, PHONE_HREF, WHATSAPP_URL } from "@/lib/siteLinks";
 import { getStoredLanguage, installGoogleTranslate, LANGUAGES, setDocumentLanguage, type LanguageCode } from "@/lib/googleTranslate";
 
@@ -96,20 +97,11 @@ export default function SiteShell({ children }: { children: ReactNode }) {
   useEffect(() => { installGoogleTranslate(); }, []);
   useEffect(() => {
     setDocumentLanguage(getStoredLanguage());
-    const metadata: Record<string, [string, string]> = {
-      "/": ["SwitchYard FX | Manage FX Risk With Confidence", "Tailored corporate FX risk management for mid-market CFOs and treasury teams."],
-      "/about": ["About | SwitchYard FX", "Meet the corporate FX advisory partner helping mid-market CFOs protect margins and unlock growth."],
-      "/services": ["Corporate FX Solutions | SwitchYard FX", "Forward contracts, options, global payments, FX risk advisory and treasury support."],
-      "/insights": ["Market Insights | SwitchYard FX", "Curated FX insights, trends and analysis for Australian treasury and finance leaders."],
-      "/contact": ["Contact | SwitchYard FX", "Book a 15-minute FX strategy consultation with the SwitchYard FX team in Sydney."],
-      "/login": ["Client Portal | SwitchYard FX", "The SwitchYard FX client portal is coming soon. Existing clients can contact their team directly."],
-      "/privacy": ["Privacy Policy | SwitchYard FX", "Read the SwitchYard FX privacy policy."],
-      "/terms": ["Terms of Service | SwitchYard FX", "Read the SwitchYard FX website terms of service."],
-      "/compliance": ["Compliance | SwitchYard FX", "SwitchYard FX regulatory, compliance and legal information."],
-    };
-    const [title, description] = metadata[location.pathname] ?? (location.pathname.startsWith("/insights/") ? ["FX Market Analysis | SwitchYard FX", "Clear market context for better treasury decisions."] : ["Page Not Found | SwitchYard FX", "Return to SwitchYard FX corporate risk management."]);
-    document.title = title;
-    document.querySelector('meta[name="description"]')?.setAttribute("content", description);
+    // Swap the page's title, description, canonical, social tags and structured data.
+    if (document.head.querySelector("title[data-seo]")?.textContent !== routeMeta(location.pathname).title) {
+      document.head.querySelectorAll("[data-seo]").forEach((node) => node.remove());
+      document.head.insertAdjacentHTML("afterbegin", renderHead(location.pathname));
+    }
   }, [location.pathname]);
   // New pages open at the top; links with a #section (e.g. /services#options) scroll to it.
   useEffect(() => {
