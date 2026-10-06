@@ -150,3 +150,6 @@ html[dir="rtl"] .lucide { transform: scaleX(-1); }
 @media (max-width: 639px) {
   body:has([data-testid="cookie-consent-banner"]) [data-testid="floating-whatsapp-button"] { bottom: 15rem; }
 }
+/* Services: dashes travel along the AUD payment corridors (stopped by the reduced-motion rule above). */
+@keyframes flow-dash { to { stroke-dashoffset: -18; } }
+.flow-dash { animation: flow-dash 1.4s linear infinite; }
