@@ -51,6 +51,8 @@ class SubmissionCreate(BaseModel):
     cadence: Literal["daily", "weekly"] | None = None
     locale: str = Field(default="en", max_length=12)
     consent: bool = False
+    # Honeypot: hidden from people in the form, so any value means a bot filled it in.
+    company_url: str | None = Field(default=None, max_length=500)
 
 
 class SubmissionResponse(BaseModel):

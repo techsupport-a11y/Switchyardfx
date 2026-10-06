@@ -51,4 +51,6 @@ export interface SubmissionPayload {
   cadence?: "daily" | "weekly";
   locale: string;
   consent: boolean;
+  /** Honeypot: hidden from people; bots that fill it are dropped server-side. */
+  company_url?: string;
 }
