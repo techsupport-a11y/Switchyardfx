@@ -126,9 +126,9 @@ html[dir="rtl"] { text-align: right; }
 html[dir="rtl"] .lucide { transform: scaleX(-1); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 
-/* Login page: a fine dot grid that fades out toward the edges. */
+/* Login page: a fine olive dot grid on white that fades out toward the edges. */
 .login-dots {
-  background-image: radial-gradient(rgba(168, 197, 186, .42) 1.2px, transparent 1.6px);
+  background-image: radial-gradient(rgba(112, 130, 56, .55) 1.2px, transparent 1.6px);
   background-size: 24px 24px;
   background-position: center;
   mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 25%, transparent 78%);
