@@ -42,7 +42,7 @@ export default function Home() {
 
   return <>
     <section className="relative isolate overflow-hidden bg-[#12261F] text-white" data-testid="home-hero-section">
-      <div className="hero-grid absolute inset-0 opacity-25" />
+      <div className="hero-grid absolute inset-0 opacity-60" />
       <motion.div className="absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#2D6A4F]/35 blur-[110px]" animate={{ scale: [1, 1.12, 1], opacity: [0.45, 0.7, 0.45] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
       <div className="absolute -bottom-24 left-[12%] h-72 w-72 rounded-full bg-[#A8C5BA]/10 blur-[90px]" />
       <div className="relative mx-auto grid min-h-svh max-w-7xl grid-cols-[minmax(0,1fr)] gap-14 px-5 pb-20 pt-32 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:px-8 lg:pb-24 lg:pt-32">
