@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import "@fontsource-variable/plus-jakarta-sans";
 import GlyphPortal from "@/components/ui/glyph-portal";
+import KineticGrid from "@/components/ui/kinetic-grid";
 import { buttonVariants } from "@/components/ui/button";
 import { BOOKING_URL, WHATSAPP_URL } from "@/lib/siteLinks";
 
@@ -41,8 +42,13 @@ function Content() {
   </div>;
 }
 
+// The brand gradient with the interactive kinetic grid on top: it warps toward the pointer
+// and ripples on click.
 function BrandField() {
-  return <div style={{ position: "absolute", inset: 0, transform: "scale(var(--gp-field-scale,1))", background: "radial-gradient(circle at 18% 10%, rgba(168,197,186,.28), transparent 36%), radial-gradient(circle at 85% 25%, rgba(82,121,111,.45), transparent 32%), radial-gradient(circle at 50% 85%, rgba(45,106,79,.55), transparent 46%), linear-gradient(135deg,#12261F 0%,#1f4a3a 50%,#0d1d17 100%)" }} />;
+  return <>
+    <div style={{ position: "absolute", inset: 0, transform: "scale(var(--gp-field-scale,1))", background: "radial-gradient(circle at 18% 10%, rgba(168,197,186,.28), transparent 36%), radial-gradient(circle at 85% 25%, rgba(82,121,111,.45), transparent 32%), radial-gradient(circle at 50% 85%, rgba(45,106,79,.55), transparent 46%), linear-gradient(135deg,#12261F 0%,#1f4a3a 50%,#0d1d17 100%)" }} />
+    <KineticGrid globalColor="brand" className="absolute inset-0 min-h-0" />
+  </>;
 }
 
 // Demo-style composition around the word, scoped to this section.
@@ -103,6 +109,6 @@ export default function ClosingPortal() {
         >
           <Content />
         </GlyphPortal>
-      : <section className="bg-[#12261F] px-5 py-24 lg:px-8"><Content /></section>}
+      : <section className="relative isolate overflow-hidden bg-[#12261F] px-5 py-24 lg:px-8"><div className="absolute inset-0 -z-10"><BrandField /></div><Content /></section>}
   </div>;
 }

@@ -1,0 +1,22 @@
+# SwitchYard FX — search engines and AI assistants are welcome to read and cite this site.
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /login
+
+# AI search and answer engines
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Disallow: /login
+
+Sitemap: https://www.switchyardfx.com.au/sitemap.xml

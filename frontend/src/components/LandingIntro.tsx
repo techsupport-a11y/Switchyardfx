@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { BrandMark } from "@/components/BrandMark";
 
 const SESSION_KEY = "switchyard-intro-seen";
 
@@ -39,12 +40,12 @@ export default function LandingIntro({ active }: { active: boolean }) {
     <motion.div className="absolute h-48 w-48 rounded-full border border-[#A8C5BA]/15" initial={reducedMotion ? false : { scale: 1.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, delay: 0.08, ease: "easeOut" }} />
     <div className="relative flex flex-col items-center">
       <motion.div
-        className="grid h-20 w-20 place-items-center rounded-[1.6rem] bg-[#A8C5BA] text-4xl font-bold text-[#12261F] shadow-[0_20px_70px_rgba(168,197,186,.2)]"
+        className="grid h-20 w-20 place-items-center rounded-[1.6rem] bg-[#A8C5BA] text-[#12261F] shadow-[0_20px_70px_rgba(168,197,186,.2)]"
         initial={reducedMotion ? false : { scale: 0.7, rotate: -9, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 230, damping: 19 }}
         data-testid="landing-intro-mark"
-      >S</motion.div>
+      ><BrandMark className="h-12 w-auto" /></motion.div>
       <motion.p className="mt-6 text-2xl font-bold tracking-[-0.03em]" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: 0.2 }} data-testid="landing-intro-brand">SwitchYard</motion.p>
       <motion.div className="mt-3 h-px bg-[#A8C5BA]/60" initial={reducedMotion ? false : { width: 0 }} animate={{ width: 88 }} transition={{ duration: 0.38, delay: 0.28, ease: "easeOut" }} />
       <motion.p className="mt-3 text-[10px] font-bold uppercase tracking-[0.28em] text-[#A8C5BA]" initial={reducedMotion ? false : { opacity: 0, letterSpacing: "0.45em" }} animate={{ opacity: 1, letterSpacing: "0.28em" }} transition={{ duration: 0.35, delay: 0.35 }} data-testid="landing-intro-tagline">Clarity in motion</motion.p>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandMark } from "@/components/BrandMark";
 import LandingIntro from "@/components/LandingIntro";
+import { renderHead, routeMeta } from "@/lib/seo";
 import { BOOKING_URL, EBURY_LEGAL_URL, EMAIL, EMAIL_HREF, PHONE_DISPLAY, PHONE_HREF, WHATSAPP_URL } from "@/lib/siteLinks";
 import { getStoredLanguage, installGoogleTranslate, LANGUAGES, setDocumentLanguage, type LanguageCode } from "@/lib/googleTranslate";
 
@@ -61,8 +62,10 @@ function Header() {
   const location = useLocation();
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
   useEffect(() => { const onScroll = () => setScrolled(window.scrollY > 80); onScroll(); window.addEventListener("scroll", onScroll, { passive: true }); return () => window.removeEventListener("scroll", onScroll); }, []);
-  return <header className={`fixed inset-x-0 top-0 z-[80] isolate transition-[padding] duration-500 ${scrolled ? "px-0 pt-0" : "px-3 pt-3"}`} data-testid="site-header">
-    <div className={`border px-5 py-3.5 transition-[background-color,border-color,box-shadow,border-radius] duration-500 lg:px-8 ${scrolled ? "rounded-b-[20px] rounded-t-none border-transparent border-b-white/15 bg-[#12261F] shadow-[0_14px_38px_rgba(0,0,0,.2)]" : "rounded-[20px] border-transparent bg-transparent shadow-none"}`} data-scrolled={scrolled ? "true" : "false"}><div className="mx-auto flex max-w-7xl items-center justify-between">
+  // Pages that open on a light background (login) keep the solid header so its white text stays readable.
+  const solid = scrolled || location.pathname === "/login";
+  return <header className={`fixed inset-x-0 top-0 z-[80] isolate transition-[padding] duration-500 ${solid ? "px-0 pt-0" : "px-3 pt-3"}`} data-testid="site-header">
+    <div className={`border px-5 py-3.5 transition-[background-color,border-color,box-shadow,border-radius] duration-500 lg:px-8 ${solid ? "rounded-b-[20px] rounded-t-none border-transparent border-b-white/15 bg-[#12261F] shadow-[0_14px_38px_rgba(0,0,0,.2)]" : "rounded-[20px] border-transparent bg-transparent shadow-none"}`} data-scrolled={solid ? "true" : "false"}><div className="mx-auto flex max-w-7xl items-center justify-between">
       <Link to="/" className="group flex items-center gap-3" data-testid="header-logo-link"><span className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-white transition-[transform,box-shadow,color,background-color] duration-300 group-hover:-rotate-3 group-hover:scale-105 group-hover:bg-[#A8C5BA] group-hover:text-[#12261F] group-hover:shadow-[0_0_0_4px_rgba(168,197,186,.18)]"><BrandMark className="h-8 w-auto" /></span><span><span className="block text-lg font-bold tracking-tight text-white transition-colors group-hover:text-[#A8C5BA]">SwitchYard</span><span className="block text-[9px] font-bold tracking-[0.2em] text-[#A8C5BA]">FX ADVISORY</span></span></Link>
       <HeaderNav pathname={location.pathname} />
       <div className="hidden items-center gap-3 lg:flex"><LanguageSwitcher /><Link to="/login" className={buttonVariants({ variant: "outline", size: "sm" }) + " rounded-full border-white/20 bg-transparent text-white transition-colors hover:border-[#A8C5BA]/60 hover:bg-white/10 hover:text-white"} data-testid="header-login-link">Login</Link><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "sm" }) + " group rounded-full bg-[#2D6A4F] text-white transition-[transform,background-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:bg-[#3d8163] hover:shadow-[0_8px_24px_rgba(110,231,168,.25)]"} data-testid="header-book-call-link">Book a Call <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></a></div>
@@ -96,20 +99,11 @@ export default function SiteShell({ children }: { children: ReactNode }) {
   useEffect(() => { installGoogleTranslate(); }, []);
   useEffect(() => {
     setDocumentLanguage(getStoredLanguage());
-    const metadata: Record<string, [string, string]> = {
-      "/": ["SwitchYard FX | Manage FX Risk With Confidence", "Tailored corporate FX risk management for mid-market CFOs and treasury teams."],
-      "/about": ["About | SwitchYard FX", "Meet the corporate FX advisory partner helping mid-market CFOs protect margins and unlock growth."],
-      "/services": ["Corporate FX Solutions | SwitchYard FX", "Forward contracts, options, global payments, FX risk advisory and treasury support."],
-      "/insights": ["Market Insights | SwitchYard FX", "Curated FX insights, trends and analysis for Australian treasury and finance leaders."],
-      "/contact": ["Contact | SwitchYard FX", "Book a 15-minute FX strategy consultation with the SwitchYard FX team in Sydney."],
-      "/login": ["Client Portal | SwitchYard FX", "The SwitchYard FX client portal is coming soon. Existing clients can contact their team directly."],
-      "/privacy": ["Privacy Policy | SwitchYard FX", "Read the SwitchYard FX privacy policy."],
-      "/terms": ["Terms of Service | SwitchYard FX", "Read the SwitchYard FX website terms of service."],
-      "/compliance": ["Compliance | SwitchYard FX", "SwitchYard FX regulatory, compliance and legal information."],
-    };
-    const [title, description] = metadata[location.pathname] ?? (location.pathname.startsWith("/insights/") ? ["FX Market Analysis | SwitchYard FX", "Clear market context for better treasury decisions."] : ["Page Not Found | SwitchYard FX", "Return to SwitchYard FX corporate risk management."]);
-    document.title = title;
-    document.querySelector('meta[name="description"]')?.setAttribute("content", description);
+    // Swap the page's title, description, canonical, social tags and structured data.
+    if (document.head.querySelector("title[data-seo]")?.textContent !== routeMeta(location.pathname).title) {
+      document.head.querySelectorAll("[data-seo]").forEach((node) => node.remove());
+      document.head.insertAdjacentHTML("afterbegin", renderHead(location.pathname));
+    }
   }, [location.pathname]);
   // New pages open at the top; links with a #section (e.g. /services#options) scroll to it.
   useEffect(() => {
