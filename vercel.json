@@ -10,18 +10,87 @@
       "root": "frontend",
       "framework": "vite",
       "rewrites": [
-        { "source": "/(.*)", "destination": "/index.html" }
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
       ]
     }
   },
+  "redirects": [
+    {
+      "source": "/market-insights",
+      "destination": "/insights",
+      "permanent": true
+    },
+    {
+      "source": "/market-insights/:path*",
+      "destination": "/insights",
+      "permanent": true
+    },
+    {
+      "source": "/market-commentary",
+      "destination": "/insights",
+      "permanent": true
+    },
+    {
+      "source": "/news",
+      "destination": "/insights",
+      "permanent": true
+    },
+    {
+      "source": "/qualification",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/presentation",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/register",
+      "destination": "/login",
+      "permanent": false
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/login",
+      "permanent": false
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/login",
+      "permanent": false
+    },
+    {
+      "source": "/request-access",
+      "destination": "/login",
+      "permanent": false
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/login",
+      "permanent": false
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "/login",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": { "service": "backend" }
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": { "service": "frontend" }
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }

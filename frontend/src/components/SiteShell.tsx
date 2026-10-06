@@ -71,7 +71,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
       "/services": ["Corporate FX Solutions | SwitchYard FX", "Forward contracts, options, global payments, FX risk advisory and treasury support."],
       "/insights": ["Market Insights | SwitchYard FX", "Curated FX insights, trends and analysis for Australian treasury and finance leaders."],
       "/contact": ["Contact | SwitchYard FX", "Book a 15-minute FX strategy consultation with the SwitchYard FX team in Sydney."],
-      "/login": ["Client Login | SwitchYard FX", "Secure access to the SwitchYard FX client portal."],
+      "/login": ["Client Portal | SwitchYard FX", "The SwitchYard FX client portal is coming soon. Existing clients can contact their team directly."],
       "/privacy": ["Privacy Policy | SwitchYard FX", "Read the SwitchYard FX privacy policy."],
       "/terms": ["Terms of Service | SwitchYard FX", "Read the SwitchYard FX website terms of service."],
       "/compliance": ["Compliance | SwitchYard FX", "SwitchYard FX regulatory, compliance and legal information."],
