@@ -1,3 +1,27 @@
+# SwitchYard FX
+
+## Deploying to Vercel
+
+`vercel.json` builds the Vite frontend from `frontend/` and serves the FastAPI backend
+as a Python function at `/api/*` (entrypoint `api/index.py`, dependencies in the root
+`requirements.txt`).
+
+1. In Vercel, **Add New → Project** and import this GitHub repository. Leave the
+   root directory as the repo root; the build settings come from `vercel.json`.
+2. Under **Settings → Environment Variables**, add:
+   - `MONGO_URL` (required): a MongoDB connection string, e.g. from MongoDB Atlas.
+     In Atlas, allow access from anywhere (`0.0.0.0/0`), since Vercel has no fixed IPs.
+   - `DB_NAME` (required): the database name, e.g. `switchyard`.
+   - `TWELVE_DATA_API_KEY` (optional): live hero prices; without it the site shows
+     clearly labelled indicative rates.
+   - `CORS_ORIGINS` (optional): only needed if another domain calls the API.
+3. Deploy. Form submissions are stored in the `submissions` collection.
+
+The production build uses `VITE_DATA_MODE=api` (`frontend/.env.production`), so forms
+post to the real backend. Locally, `frontend/.env.example` shows the mock/api switch.
+
+---
+
 # farm-ts
 
 Minimal split backend/frontend starter: **FastAPI + MongoDB** behind a
