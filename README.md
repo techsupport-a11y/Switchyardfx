@@ -2,12 +2,20 @@
 
 ## Deploying to Vercel
 
-`vercel.json` builds the Vite frontend from `frontend/` and serves the FastAPI backend
-as a Python function at `/api/*` (entrypoint `api/index.py`, dependencies in the root
-`requirements.txt`).
+`vercel.json` deploys the repo as one Vercel project with two services:
+
+- `frontend` (`frontend/`, Vite): public at `/`; unknown paths fall back to `index.html`
+  so client-side routes like `/about` load on refresh.
+- `backend` (`backend/`, FastAPI, entrypoint `server.py`): public at `/api/*`. The full
+  path is passed through, which matches the backend's `/api` router prefix. Runtime
+  dependencies come from `backend/requirements.txt`; dev/test tools are in
+  `backend/requirements-dev.txt`.
+
+The browser calls the backend with relative `/api/...` URLs on the same domain, so no
+service bindings are needed. `vercel dev` runs both services together locally.
 
 1. In Vercel, **Add New → Project** and import this GitHub repository. Leave the
-   root directory as the repo root; the build settings come from `vercel.json`.
+   root directory as the repo root; services and build settings come from `vercel.json`.
 2. Under **Settings → Environment Variables**, add:
    - `MONGO_URL` (required): a MongoDB connection string, e.g. from MongoDB Atlas.
      In Atlas, allow access from anywhere (`0.0.0.0/0`), since Vercel has no fixed IPs.
