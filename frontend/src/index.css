@@ -173,7 +173,20 @@ html[dir="rtl"] .lucide { transform: scaleX(-1); }
 
 @media (max-width: 639px) {
   body:has([data-testid="cookie-consent-banner"]) [data-testid="floating-whatsapp-button"] { bottom: 15rem; }
+  body:has([data-testid="cookie-consent-banner"]) #syfx-chat-root { --syfx-bottom: 15rem; }
+  body[data-chat-widget]:has([data-testid="cookie-consent-banner"]) [data-testid="floating-whatsapp-button"] { bottom: calc(15rem + 68px); }
 }
 /* Services: dashes travel along the AUD payment corridors (stopped by the reduced-motion rule above). */
 @keyframes flow-dash { to { stroke-dashoffset: -18; } }
 .flow-dash { animation: flow-dash 1.4s linear infinite; }
+
+/* Bottom-right contact column: the chat widget's launcher (lib/chatWidget.ts) at the bottom,
+   the WhatsApp button 12px above it, both 56px and on the same right edge. The variables are
+   read inside the widget's shadow root. Its host gets its own stacking context so page content
+   with a z-index can't paint over it. */
+#syfx-chat-root { position: relative; z-index: 999999; --syfx-right: 16px; --syfx-bottom: 16px; }
+@media (min-width: 640px) { #syfx-chat-root { --syfx-right: 24px; --syfx-bottom: 24px; } }
+body[data-chat-widget] [data-testid="floating-whatsapp-button"] { bottom: calc(16px + 68px); }
+@media (min-width: 640px) { body[data-chat-widget] [data-testid="floating-whatsapp-button"] { bottom: calc(24px + 68px); } }
+/* While the chat panel is open, WhatsApp steps aside so it never sits on top of the conversation. */
+body[data-chat-open] [data-testid="floating-whatsapp-button"] { opacity: 0; pointer-events: none; transform: scale(.8); }
