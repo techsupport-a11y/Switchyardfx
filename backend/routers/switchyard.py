@@ -6,6 +6,7 @@ import time
 from datetime import datetime, timezone
 
 import httpx
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query
 
 from lib.db import db
@@ -177,7 +178,12 @@ async def create_submission(input: SubmissionCreate):
     if not input.consent:
         raise HTTPException(status_code=400, detail="Consent is required")
     received_at = datetime.now(timezone.utc)
-    doc = input.model_dump()
+    if input.company_url:
+        # Honeypot tripped: answer like a normal success so the bot doesn't adapt,
+        # but store nothing and send no email.
+        logger.info("Dropped %s submission that filled the honeypot field", input.kind)
+        return SubmissionResponse(ok=True, id=str(ObjectId()), received_at=received_at)
+    doc = input.model_dump(exclude={"company_url"})
     doc["email"] = str(input.email).lower()
     doc["received_at"] = received_at
     result = await db.submissions.insert_one(doc)

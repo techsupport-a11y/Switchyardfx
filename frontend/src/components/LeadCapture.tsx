@@ -32,6 +32,7 @@ export function LeadForm({ kind, compact = false, showVolume = false, showNewsle
       message: String(form.get("message") ?? ""), role: String(form.get("role") ?? ""),
       cadence: (form.get("cadence") as "daily" | "weekly" | null) ?? undefined,
       locale: document.documentElement.lang || "en", consent: form.get("consent") === "on",
+      company_url: String(form.get("company_url") ?? "") || undefined,
     };
     if (!payload.consent) { toast.error("Please confirm you agree to be contacted."); return; }
     mutation.mutate(payload);
@@ -41,6 +42,8 @@ export function LeadForm({ kind, compact = false, showVolume = false, showNewsle
 
   return (
     <form onSubmit={onSubmit} className={`grid gap-4 ${compact ? "sm:grid-cols-[1fr_auto]" : "sm:grid-cols-2"}`} noValidate data-testid={`${kind}-form`}>
+      {/* Honeypot: off-screen and skipped by keyboard and screen readers, so only bots fill it. */}
+      <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] h-px w-px overflow-hidden"><label>Company website<input type="text" name="company_url" tabIndex={-1} autoComplete="off" defaultValue="" data-testid={`${kind}-honeypot`} /></label></div>
       <Input name="name" placeholder="Your name" aria-label="Your name" className="h-12 rounded-xl border-white/15 bg-white/10 text-white placeholder:text-white/40" />
       <Input name="company" placeholder="Company" aria-label="Company" className="h-12 rounded-xl border-white/15 bg-white/10 text-white placeholder:text-white/40" />
       <Input name="email" type="email" required placeholder="Work email *" aria-label="Work email" className="h-12 rounded-xl border-white/15 bg-white/10 text-white placeholder:text-white/40" />
