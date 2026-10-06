@@ -23,6 +23,13 @@ service bindings are needed. `vercel dev` runs both services together locally.
    - `TWELVE_DATA_API_KEY` (optional): live hero prices; without it the site shows
      clearly labelled indicative rates.
    - `CORS_ORIGINS` (optional): only needed if another domain calls the API.
+   - `RESEND_API_KEY` + `NOTIFY_EMAIL_TO` (optional): email the team about every new
+     form submission via [Resend](https://resend.com). `NOTIFY_EMAIL_TO` takes one or more
+     comma-separated addresses. `NOTIFY_EMAIL_FROM` defaults to `onboarding@resend.dev`,
+     which Resend only delivers to your own Resend account email; to send from
+     `@switchyardfx.com.au` or to other inboxes, verify the domain in Resend and set
+     e.g. `NOTIFY_EMAIL_FROM="SwitchYard FX <leads@switchyardfx.com.au>"`. A failed email
+     is logged and never blocks the submission.
 3. Deploy. Form submissions are stored in the `submissions` collection.
 
 The production build uses `VITE_DATA_MODE=api` (`frontend/.env.production`), so forms

@@ -1,4 +1,5 @@
 import asyncio
+import html
 import logging
 import os
 import time
@@ -20,6 +21,8 @@ FALLBACK_RATES = {
     "GBP": (0.5129, 0.92),
 }
 TWELVE_DATA_URL = "https://api.twelvedata.com"
+RESEND_URL = "https://api.resend.com/emails"
+SUBMISSION_LABELS = {"contact": "Contact enquiry", "newsletter": "Newsletter sign-up", "hedge-guide": "Hedge Policy Guide request"}
 MARKET_SYMBOLS = ("AUD/USD", "AUD/EUR", "AUD/GBP")
 FALLBACK_CANDLES = [
     0.6504, 0.6508, 0.6502, 0.6511, 0.6515, 0.6509, 0.6518, 0.6522,
@@ -170,4 +173,52 @@ async def create_submission(input: SubmissionCreate):
     doc["email"] = str(input.email).lower()
     doc["received_at"] = received_at
     result = await db.submissions.insert_one(doc)
+    await _notify_submission(input, doc["email"], received_at)
     return SubmissionResponse(ok=True, id=str(result.inserted_id), received_at=received_at)
+
+
+async def _notify_submission(input: SubmissionCreate, email: str, received_at: datetime) -> None:
+    """Email the team about a new lead via Resend. The lead is already stored, so a
+    missing config or a failed send is logged and never fails the request."""
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    recipients = [addr.strip() for addr in os.environ.get("NOTIFY_EMAIL_TO", "").split(",") if addr.strip()]
+    if not api_key or not recipients:
+        return
+    sender = os.environ.get("NOTIFY_EMAIL_FROM", "").strip() or "SwitchYard FX <onboarding@resend.dev>"
+    label = SUBMISSION_LABELS.get(input.kind, input.kind)
+    fields = [
+        ("Type", label),
+        ("Name", input.name),
+        ("Email", email),
+        ("Company", input.company),
+        ("Phone", input.phone),
+        ("Role", input.role),
+        ("Annual FX volume", input.annual_fx_volume),
+        ("Newsletter cadence", input.cadence),
+        ("Message", input.message),
+        ("Language", input.locale),
+        ("Received", received_at.strftime("%d %b %Y, %H:%M UTC")),
+    ]
+    rows = [(name, str(value)) for name, value in fields if value]
+    text = "\n".join(f"{name}: {value}" for name, value in rows)
+    table = "".join(
+        f'<tr><td style="padding:6px 12px;color:#4A5A55;vertical-align:top"><b>{html.escape(name)}</b></td>'
+        f'<td style="padding:6px 12px;white-space:pre-wrap">{html.escape(value)}</td></tr>'
+        for name, value in rows
+    )
+    payload = {
+        "from": sender,
+        "to": recipients,
+        "reply_to": email,
+        "subject": f"New {label.lower()}: {input.name or email}",
+        "text": text,
+        "html": f'<h2 style="color:#12261F">New {html.escape(label.lower())}</h2><table>{table}</table>',
+    }
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as http:
+            response = await http.post(RESEND_URL, json=payload, headers={"Authorization": f"Bearer {api_key}"})
+            response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        logger.warning("Lead notification email rejected by Resend (%s): %s", exc.response.status_code, exc.response.text[:300])
+    except httpx.HTTPError as exc:
+        logger.warning("Lead notification email failed (%s)", type(exc).__name__)
