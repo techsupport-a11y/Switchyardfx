@@ -30,11 +30,41 @@ export function getStoredLanguage(): LanguageCode {
   return LANGUAGES.some(([code]) => code === stored) ? (stored as LanguageCode) : "en";
 }
 
+// Google Translate keeps its choice in a "googtrans" cookie that may be scoped to the host, to
+// ".host" or to a parent domain (e.g. ".switchyardfx.com.au" when browsing www.), so every
+// variant has to be written or cleared together.
+function translateCookieDomains() {
+  const labels = window.location.hostname.split(".");
+  const domains = [""];
+  for (let i = 0; i < labels.length - 1; i += 1) {
+    const domain = labels.slice(i).join(".");
+    domains.push(`; domain=${domain}`, `; domain=.${domain}`);
+  }
+  return domains;
+}
+
+function hasTranslateCookie() {
+  return document.cookie.split("; ").some((part) => part.startsWith("googtrans=") && part !== "googtrans=/en/en");
+}
+
 export function setDocumentLanguage(language: LanguageCode) {
   window.localStorage.setItem(LANGUAGE_KEY, language);
   document.documentElement.lang = language;
   document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-  document.cookie = `googtrans=/en/${language}; path=/`;
+  if (language === "en") {
+    // Selecting English in Google's widget doesn't undo a translation, so clear the cookie
+    // everywhere and reload once to bring back the original page.
+    const wasTranslated = hasTranslateCookie();
+    for (const domain of translateCookieDomains()) {
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+    }
+    // Reload only if the cookie is really gone, so a cookie we can't clear never loops.
+    if (wasTranslated && !hasTranslateCookie()) window.location.reload();
+    return;
+  }
+  for (const domain of translateCookieDomains()) {
+    document.cookie = `googtrans=/en/${language}; path=/${domain}`;
+  }
   const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
   if (select && select.value !== language) {
     select.value = language;
