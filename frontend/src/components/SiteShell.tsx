@@ -36,6 +36,24 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   </div>;
 }
 
+// Desktop nav: a soft pill glides to whichever link is hovered or focused, and a dot marks
+// the current page.
+function HeaderNav({ pathname }: { pathname: string }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const reducedMotion = useReducedMotion();
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  return <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation" onMouseLeave={() => setHovered(null)} onBlur={() => setHovered(null)}>
+    {navLinks.map(([name, href]) => {
+      const active = isActive(href);
+      return <Link key={href} to={href} aria-current={active ? "page" : undefined} onMouseEnter={() => setHovered(href)} onFocus={() => setHovered(href)} className={`relative rounded-full px-3.5 py-2 text-sm transition-colors ${active || hovered === href ? "text-white" : "text-white/70"}`} data-testid={`header-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>
+        {hovered === href && <motion.span layoutId="header-nav-hover" className="absolute inset-0 -z-10 rounded-full bg-white/10" transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }} />}
+        {name}
+        {active && <motion.span layoutId="header-nav-active" className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#A8C5BA]" transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }} />}
+      </Link>;
+    })}
+  </nav>;
+}
+
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -44,20 +62,32 @@ function Header() {
   useEffect(() => { const onScroll = () => setScrolled(window.scrollY > 80); onScroll(); window.addEventListener("scroll", onScroll, { passive: true }); return () => window.removeEventListener("scroll", onScroll); }, []);
   return <header className={`fixed inset-x-0 top-0 z-[80] isolate transition-[padding] duration-500 ${scrolled ? "px-0 pt-0" : "px-3 pt-3"}`} data-testid="site-header">
     <div className={`border px-5 py-3.5 transition-[background-color,border-color,box-shadow,border-radius] duration-500 lg:px-8 ${scrolled ? "rounded-b-[20px] rounded-t-none border-transparent border-b-white/15 bg-[#12261F] shadow-[0_14px_38px_rgba(0,0,0,.2)]" : "rounded-[20px] border-transparent bg-transparent shadow-none"}`} data-scrolled={scrolled ? "true" : "false"}><div className="mx-auto flex max-w-7xl items-center justify-between">
-      <Link to="/" className="group flex items-center gap-3" data-testid="header-logo-link"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#A8C5BA] text-lg font-bold text-[#12261F] transition-transform group-hover:rotate-6">S</span><span><span className="block text-lg font-bold tracking-tight text-white">SwitchYard</span><span className="block text-[9px] font-bold tracking-[0.2em] text-[#A8C5BA]">FX ADVISORY</span></span></Link>
-      <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">{navLinks.map(([name, href]) => <Link key={href} to={href} className="text-sm text-white/70 transition-colors hover:text-white" data-testid={`header-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>{name}</Link>)}</nav>
-      <div className="hidden items-center gap-3 lg:flex"><LanguageSwitcher /><Link to="/login" className={buttonVariants({ variant: "outline", size: "sm" }) + " rounded-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"} data-testid="header-login-link">Login</Link><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "sm" }) + " rounded-full bg-[#2D6A4F] text-white hover:bg-[#3d8163]"} data-testid="header-book-call-link">Book a Call <ArrowUpRight size={14} /></a></div>
+      <Link to="/" className="group flex items-center gap-3" data-testid="header-logo-link"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#A8C5BA] text-lg font-bold text-[#12261F] transition-[transform,box-shadow] duration-300 group-hover:rotate-6 group-hover:scale-105 group-hover:shadow-[0_0_0_4px_rgba(168,197,186,.18)]">S</span><span><span className="block text-lg font-bold tracking-tight text-white transition-colors group-hover:text-[#A8C5BA]">SwitchYard</span><span className="block text-[9px] font-bold tracking-[0.2em] text-[#A8C5BA]">FX ADVISORY</span></span></Link>
+      <HeaderNav pathname={location.pathname} />
+      <div className="hidden items-center gap-3 lg:flex"><LanguageSwitcher /><Link to="/login" className={buttonVariants({ variant: "outline", size: "sm" }) + " rounded-full border-white/20 bg-transparent text-white transition-colors hover:border-[#A8C5BA]/60 hover:bg-white/10 hover:text-white"} data-testid="header-login-link">Login</Link><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "sm" }) + " group rounded-full bg-[#2D6A4F] text-white transition-[transform,background-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:bg-[#3d8163] hover:shadow-[0_8px_24px_rgba(110,231,168,.25)]"} data-testid="header-book-call-link">Book a Call <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></a></div>
       <button type="button" onClick={() => setMenuOpen(true)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-white lg:hidden" aria-label="Open menu" data-testid="mobile-menu-open-button"><Menu size={20} /></button>
     </div></div>
-    <AnimatePresence>{menuOpen && <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 24 }} className="fixed inset-0 z-50 flex flex-col bg-[#12261F] p-6 lg:hidden" data-testid="mobile-menu"><div className="flex items-center justify-between"><span className="text-lg font-bold text-white">SwitchYard</span><button type="button" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-white" aria-label="Close menu" data-testid="mobile-menu-close-button"><X size={20} /></button></div><nav className="mt-14 grid gap-5">{navLinks.map(([name, href]) => <Link key={href} to={href} className="text-3xl font-bold text-white" data-testid={`mobile-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>{name}</Link>)}<Link to="/login" className="text-3xl font-bold text-white" data-testid="mobile-nav-login">Login</Link></nav><div className="mt-auto grid gap-4"><LanguageSwitcher mobile /><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "lg" }) + " justify-center rounded-full bg-[#A8C5BA] text-[#12261F]"} data-testid="mobile-book-call-link">Book a Call <ArrowUpRight size={18} /></a></div></motion.div>}</AnimatePresence>
+    <AnimatePresence>{menuOpen && <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 24 }} className="fixed inset-0 z-50 flex flex-col bg-[#12261F] p-6 lg:hidden" data-testid="mobile-menu"><div className="flex items-center justify-between"><span className="text-lg font-bold text-white">SwitchYard</span><button type="button" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-white" aria-label="Close menu" data-testid="mobile-menu-close-button"><X size={20} /></button></div><nav className="mt-14 grid gap-5">{navLinks.map(([name, href]) => <Link key={href} to={href} aria-current={(href === "/" ? location.pathname === "/" : location.pathname.startsWith(href)) ? "page" : undefined} className={`text-3xl font-bold transition-colors ${(href === "/" ? location.pathname === "/" : location.pathname.startsWith(href)) ? "text-[#A8C5BA]" : "text-white hover:text-[#A8C5BA]"}`} data-testid={`mobile-nav-${name.toLowerCase().replaceAll(" ", "-")}`}>{name}</Link>)}<Link to="/login" className="text-3xl font-bold text-white" data-testid="mobile-nav-login">Login</Link></nav><div className="mt-auto grid gap-4"><LanguageSwitcher mobile /><a href={BOOKING_URL} target="_blank" rel="noreferrer" className={buttonVariants({ size: "lg" }) + " justify-center rounded-full bg-[#A8C5BA] text-[#12261F]"} data-testid="mobile-book-call-link">Book a Call <ArrowUpRight size={18} /></a></div></motion.div>}</AnimatePresence>
   </header>;
 }
 
 function CookieBanner() {
-  const [visible, setVisible] = useState(() => window.localStorage.getItem("switchyard-cookies") !== "accepted");
-  if (!visible) return null;
-  function decide(value: string) { window.localStorage.setItem("switchyard-cookies", value); setVisible(false); }
-  return <motion.div initial={{ y: 120 }} animate={{ y: 0 }} className="fixed bottom-3 left-3 right-3 z-[90] mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-[#DCE5E1] bg-white/95 p-5 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:left-4 sm:right-4 sm:flex-row sm:items-center sm:justify-between" data-testid="cookie-consent-banner"><div><p className="font-bold text-[#12261F]" data-testid="cookie-consent-title">Your privacy matters</p><p className="mt-1 max-w-xl text-sm text-[#4A5A55]" data-testid="cookie-consent-copy">We use essential cookies to keep this site working and optional analytics to improve it.</p></div><div className="flex shrink-0 gap-2"><Button variant="outline" onClick={() => decide("declined")} className="rounded-full" data-testid="cookie-decline-button">Decline</Button><Button onClick={() => decide("accepted")} className="rounded-full bg-[#2D6A4F]" data-testid="cookie-accept-button">Accept</Button></div></motion.div>;
+  const [undecided, setUndecided] = useState(() => { try { return window.localStorage.getItem("switchyard-cookies") === null; } catch { return true; } });
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    if (!undecided || pastHero) return;
+    // The hero is the first section on every page; show the banner once it has scrolled away.
+    const check = () => {
+      const hero = document.querySelector<HTMLElement>(".site-main > section:first-child");
+      const threshold = (hero?.offsetHeight ?? window.innerHeight) * 0.75;
+      if (window.scrollY > threshold) setPastHero(true);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    return () => window.removeEventListener("scroll", check);
+  }, [undecided, pastHero]);
+  function decide(value: string) { try { window.localStorage.setItem("switchyard-cookies", value); } catch { /* storage blocked: hide for this visit */ } setUndecided(false); }
+  return <AnimatePresence>{undecided && pastHero && <motion.div key="cookie-banner" initial={{ y: 140, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 140, opacity: 0 }} transition={{ type: "spring", damping: 26, stiffness: 260 }} className="fixed bottom-3 left-3 right-3 z-[90] mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-[#DCE5E1] bg-white/95 p-5 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:left-4 sm:right-4 sm:flex-row sm:items-center sm:justify-between" data-testid="cookie-consent-banner"><div><p className="font-bold text-[#12261F]" data-testid="cookie-consent-title">Your privacy matters</p><p className="mt-1 max-w-xl text-sm text-[#4A5A55]" data-testid="cookie-consent-copy">We use essential cookies to keep this site working and optional analytics to improve it.</p></div><div className="flex shrink-0 gap-2"><Button variant="outline" onClick={() => decide("declined")} className="rounded-full" data-testid="cookie-decline-button">Decline</Button><Button onClick={() => decide("accepted")} className="rounded-full bg-[#2D6A4F]" data-testid="cookie-accept-button">Accept</Button></div></motion.div>}</AnimatePresence>;
 }
 
 export default function SiteShell({ children }: { children: ReactNode }) {
