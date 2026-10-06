@@ -40,7 +40,7 @@ export default function GlobalReach() {
   return <section className="relative overflow-hidden bg-[#12261F] px-5 py-20 text-white lg:px-8 lg:py-28" style={darkTokens} data-testid="global-reach-section">
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_45%,rgba(82,121,111,.28),transparent_45%)]" />
     <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
-      <Reveal>
+      <Reveal from="left">
         <SectionLabel>Global reach</SectionLabel>
         <h2 className="text-4xl font-bold leading-[1.05] tracking-[-0.045em] sm:text-5xl" data-testid="global-reach-heading">From Australia<br /><span className="text-[#A8C5BA]">to the world.</span></h2>
         <p className="mt-6 max-w-lg text-lg leading-8 text-white/60">Robust and fully secure payment infrastructure to enable reliable transfers across the globe, with live AUD pricing on the corridors you use most.</p>
@@ -69,7 +69,7 @@ export default function GlobalReach() {
         </ul>
       </Reveal>
 
-      <Reveal delay={0.1} className="flex justify-center">
+      <Reveal from="scale" delay={0.1} className="flex justify-center">
         <FlagGlobe
           markers={MARKERS}
           dark

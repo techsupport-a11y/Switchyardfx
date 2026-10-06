@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 // - the canvas fills its own container (not the window) and tracks the pointer relative to it;
 // - it renders at device pixel ratio, pauses while off screen, and draws a still frame for
 //   reduced-motion users;
-// - a "brand" palette draws the grid over a transparent background in SwitchYard sage.
+// - "brand" (sage) and "olive" palettes draw the grid over a transparent background, so the
+//   section behind it shows through.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ const LERP_SPEED = 0.08;
 const NODE_BASE_RADIUS = 1.8;
 const NODE_ACTIVE_RADIUS = 3.2;
 
-const PALETTES: Record<"default" | "monochrome" | "brand", Palette> = {
+const PALETTES: Record<"default" | "monochrome" | "brand" | "olive", Palette> = {
   default: {
     bg: "#161618",
     lineBase: { r: 255, g: 255, b: 255, a: 0.13 },
@@ -67,6 +68,16 @@ const PALETTES: Record<"default" | "monochrome" | "brand", Palette> = {
     glow: "168,197,186",
     ripple: "168,197,186",
   },
+  olive: {
+    bg: null,
+    lineBase: { r: 112, g: 130, b: 56, a: 0.12 },
+    lineActive: { r: 92, g: 110, b: 40, a: 0.8 },
+    nodeBase: { r: 112, g: 130, b: 56, a: 0.4 },
+    nodeActive: { r: 82, g: 100, b: 32, a: 1.0 },
+    dot: "rgba(112,130,56,0.35)",
+    glow: "112,130,56",
+    ripple: "112,130,56",
+  },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -92,7 +103,7 @@ export default function KineticGrid({
 }: {
   children?: ReactNode;
   className?: string;
-  globalColor?: "default" | "monochrome" | "brand";
+  globalColor?: "default" | "monochrome" | "brand" | "olive";
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -179,7 +190,7 @@ export default function KineticGrid({
       for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
         for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
           ctx.beginPath();
-          ctx.arc(x, y, 0.7, 0, Math.PI * 2);
+          ctx.arc(x, y, globalColor === "olive" ? 1.1 : 0.7, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -357,7 +368,7 @@ export default function KineticGrid({
       ref={rootRef}
       className={cn(
         "relative w-full min-h-screen overflow-hidden",
-        globalColor === "monochrome" ? "bg-[#000000]" : globalColor === "brand" ? "bg-transparent" : "bg-[#161618]",
+        globalColor === "monochrome" ? "bg-[#000000]" : globalColor === "default" ? "bg-[#161618]" : "bg-transparent",
         className,
       )}
     >

@@ -144,6 +144,8 @@ html[dir="rtl"] .lucide { transform: scaleX(-1); }
 .hero-fade { background: linear-gradient(to bottom, transparent, rgba(18, 38, 31, .92)); }
 .dark-surface .section-label { color: #A8C5BA; }
 .section-transition { box-shadow: inset 0 1px 0 rgba(82, 121, 111, .08); }
+/* Sections slide in from the sides; never let that widen the page. */
+.site-main { overflow-x: clip; }
 .site-main > section:first-child:not([data-testid="home-hero-section"]) { padding-top: clamp(7rem, 10vw, 9rem); }
 .market-ticker { animation: market-ticker 20s linear infinite; }
 
