@@ -6,6 +6,7 @@ import KineticGrid from "@/components/ui/kinetic-grid";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BOOKING_URL, WHATSAPP_URL } from "@/lib/siteLinks";
+import { useAfterIdle } from "@/lib/defer";
 
 // The closing call to action above the footer, laid out like the Glyph Portal demo: scrolling
 // flies the camera through a letter of "SWITCHYARD" into the forest-green field, where our
@@ -81,6 +82,10 @@ const styles = `
 `;
 
 export default function ClosingPortal() {
+  // The portal measures the word and builds its scroll scene; that work waits for the first
+  // idle moment after the first paint. Until then the same content shows statically, exactly
+  // as it does while the font loads.
+  const idle = useAfterIdle();
   const [fontReady, setFontReady] = useState(() => {
     try { return document.fonts.check(FONT_QUERY, WORD); } catch { return false; }
   });
@@ -94,7 +99,7 @@ export default function ClosingPortal() {
 
   return <div data-closing-portal data-testid="final-cta-section" style={{ fontFamily: FACE }}>
     <style>{styles}</style>
-    {fontReady
+    {fontReady && idle
       ? <GlyphPortal
           word={WORD}
           fontFamily={FACE}

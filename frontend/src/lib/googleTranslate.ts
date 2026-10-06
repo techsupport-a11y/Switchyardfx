@@ -1,3 +1,4 @@
+import { whenIdle } from "./defer";
 declare global {
   interface Window {
     google?: { translate?: { TranslateElement?: new (options: unknown, element: string) => unknown } };
@@ -91,11 +92,18 @@ export function installGoogleTranslate() {
   };
   if (!scriptRequested && !document.querySelector("script[data-switchyard-translate]")) {
     scriptRequested = true;
-    const script = document.createElement("script");
-    script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-    script.async = true;
-    script.dataset.switchyardTranslate = "true";
-    script.onerror = () => { scriptRequested = false; };
-    document.head.appendChild(script);
+    const inject = () => {
+      const script = document.createElement("script");
+      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      script.dataset.switchyardTranslate = "true";
+      script.onerror = () => { scriptRequested = false; };
+      document.head.appendChild(script);
+    };
+    // English pages need nothing from the widget until someone switches language (the choice is
+    // kept in a cookie the widget reads when it loads), so it waits for an idle moment.
+    // Translated pages load it straight away.
+    if (language === "en" && !hasTranslateCookie()) whenIdle(inject);
+    else inject();
   }
 }
