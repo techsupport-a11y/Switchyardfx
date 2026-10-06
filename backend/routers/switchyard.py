@@ -30,6 +30,11 @@ FALLBACK_CANDLES = [
     0.6530, 0.6524, 0.6519, 0.6527, 0.6535, 0.6532, 0.6528, 0.6538,
     0.6541, 0.6536, 0.6544, 0.6540, 0.6547, 0.6543, 0.6549, 0.6552,
 ]
+# Twelve Data's free plan allows 800 credits/day and each refresh costs 4 (3 quotes + 1
+# series), so live data is reused for 10 minutes (≤576 credits/day per warm instance).
+# Fallbacks expire sooner so live prices return quickly after an outage or rate limit.
+LIVE_CACHE_SECONDS = 600
+FALLBACK_CACHE_SECONDS = 60
 _market_cache: tuple[float, MarketOverviewResponse] | None = None
 
 
@@ -70,8 +75,11 @@ def _parse_quote_payload(payload: dict) -> list[MarketQuote]:
 async def get_market_overview():
     global _market_cache
     now_monotonic = time.monotonic()
-    if _market_cache and now_monotonic - _market_cache[0] < 60:
-        return _market_cache[1]
+    if _market_cache:
+        cached_at, cached = _market_cache
+        ttl = LIVE_CACHE_SECONDS if cached.source == "live" else FALLBACK_CACHE_SECONDS
+        if now_monotonic - cached_at < ttl:
+            return cached
 
     api_key = os.environ.get("TWELVE_DATA_API_KEY", "").strip()
     if not api_key:
