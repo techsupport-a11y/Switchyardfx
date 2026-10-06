@@ -56,10 +56,10 @@ export function LeadForm({ kind, compact = false, showVolume = false, showNewsle
 
 export function GuideDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-md rounded-3xl border-[#DCE5E1] bg-white p-7">
-      <DialogHeader><DialogTitle className="text-2xl text-[#12261F]">Get the Hedge Policy Guide</DialogTitle><DialogDescription className="text-[#4A5A55]">A practical starting point for building a board-ready FX policy.</DialogDescription></DialogHeader>
+    <DialogContent className="max-w-md rounded-3xl border-white/10 bg-[#12261F] p-7 text-white">
+      <DialogHeader><DialogTitle className="text-2xl text-white">Get the Hedge Policy Guide</DialogTitle><DialogDescription className="text-white/60">A practical starting point for building a board-ready FX policy.</DialogDescription></DialogHeader>
       <LeadForm kind="hedge-guide" compact />
-      <DialogFooter><p className="text-xs text-[#4A5A55]">We respect your inbox. Unsubscribe anytime.</p></DialogFooter>
+      <DialogFooter className="border-white/10 bg-transparent"><p className="text-xs text-white/50">We respect your inbox. Unsubscribe anytime.</p></DialogFooter>
     </DialogContent>
   </Dialog>;
 }

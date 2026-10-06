@@ -1,3 +1,35 @@
+# SwitchYard FX
+
+## Deploying to Vercel
+
+`vercel.json` deploys the repo as one Vercel project with two services:
+
+- `frontend` (`frontend/`, Vite): public at `/`; unknown paths fall back to `index.html`
+  so client-side routes like `/about` load on refresh.
+- `backend` (`backend/`, FastAPI, entrypoint `server.py`): public at `/api/*`. The full
+  path is passed through, which matches the backend's `/api` router prefix. Runtime
+  dependencies come from `backend/requirements.txt`; dev/test tools are in
+  `backend/requirements-dev.txt`.
+
+The browser calls the backend with relative `/api/...` URLs on the same domain, so no
+service bindings are needed. `vercel dev` runs both services together locally.
+
+1. In Vercel, **Add New → Project** and import this GitHub repository. Leave the
+   root directory as the repo root; services and build settings come from `vercel.json`.
+2. Under **Settings → Environment Variables**, add:
+   - `MONGO_URL` (required): a MongoDB connection string, e.g. from MongoDB Atlas.
+     In Atlas, allow access from anywhere (`0.0.0.0/0`), since Vercel has no fixed IPs.
+   - `DB_NAME` (required): the database name, e.g. `switchyard`.
+   - `TWELVE_DATA_API_KEY` (optional): live hero prices; without it the site shows
+     clearly labelled indicative rates.
+   - `CORS_ORIGINS` (optional): only needed if another domain calls the API.
+3. Deploy. Form submissions are stored in the `submissions` collection.
+
+The production build uses `VITE_DATA_MODE=api` (`frontend/.env.production`), so forms
+post to the real backend. Locally, `frontend/.env.example` shows the mock/api switch.
+
+---
+
 # farm-ts
 
 Minimal split backend/frontend starter: **FastAPI + MongoDB** behind a
