@@ -10,8 +10,12 @@ class RewardItem(BaseModel):
     id: str
     title: str
     description: str
-    points: int
+    points: int | None = None
+    value_aud: int
     category: str
+    link: str
+    image: str
+    trending: bool = False
 
 
 class RegisterRequest(BaseModel):
@@ -74,6 +78,16 @@ class RedemptionView(BaseModel):
     created_at: str
 
 
+class PointsHistoryEntry(BaseModel):
+    id: str
+    kind: Literal["credit", "debit"]
+    title: str
+    detail: str
+    points: int
+    status: ApprovalStatus
+    created_at: str
+
+
 class MemberView(BaseModel):
     id: str
     name: str
@@ -87,6 +101,7 @@ class MemberView(BaseModel):
 class MemberDetail(MemberView):
     vouchers: list[VoucherView]
     redemptions: list[RedemptionView]
+    points_history: list[PointsHistoryEntry]
 
 
 class RewardsSession(BaseModel):

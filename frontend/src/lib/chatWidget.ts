@@ -1,3 +1,5 @@
+import { BRAND_MARK_PATH } from "@/components/BrandMark";
+
 // The SwitchYard chat widget (switchyard-fx-chat.js, loaded in index.html) mounts a shadow root
 // at #syfx-chat-root with a fixed .syfx-launcher button and .syfx-panel. Page CSS can't reach
 // inside a shadow root, so this adds a small stylesheet to it once it appears:
@@ -42,10 +44,72 @@ const css = `
   }
   .syfx-launcher:hover > :not(:first-child),
   .syfx-launcher:focus-visible > :not(:first-child) { opacity: 1 !important; transition-delay: .08s !important; }
+
+  /* Give the hosted conversation window the same calm, rounded surfaces as the site. */
+  .syfx-panel {
+    box-sizing: border-box !important;
+    width: min(380px, calc(100vw - 32px)) !important;
+    max-height: min(620px, calc(100dvh - 112px)) !important;
+    border: 1px solid #dce5e1 !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background: #f5f7f6 !important;
+    color: #12261f !important;
+    box-shadow: 0 24px 64px rgba(18, 38, 31, .24) !important;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  }
+  .syfx-panel header,
+  .syfx-panel [class*="header"] {
+    background-color: #12261f !important;
+    color: #fff !important;
+  }
+  .syfx-panel input,
+  .syfx-panel textarea {
+    box-sizing: border-box !important;
+    border: 1px solid #dce5e1 !important;
+    border-radius: 14px !important;
+    color: #12261f !important;
+    font: inherit !important;
+  }
+  .syfx-panel input:focus,
+  .syfx-panel textarea:focus {
+    outline: 2px solid rgba(45, 106, 79, .2) !important;
+    border-color: #2d6a4f !important;
+  }
+  .syfx-panel button { font-family: inherit !important; }
+  @media (max-width: 480px) {
+    .syfx-panel {
+      right: 16px !important;
+      bottom: calc(var(--syfx-bottom, 16px) + 68px) !important;
+      width: calc(100vw - 32px) !important;
+      max-height: min(620px, calc(100dvh - var(--syfx-bottom, 16px) - 100px)) !important;
+      border-radius: 22px !important;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     .syfx-launcher { transition: none !important; }
   }
 `;
+
+function applyCompanyMark(root: ShadowRoot): void {
+  const launcher = root.querySelector<HTMLElement>(".syfx-launcher");
+  const icon = launcher?.querySelector("svg, img");
+  if (!launcher || !icon || launcher.dataset.syfxBrandMark === "true") return;
+
+  const mark = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  mark.setAttribute("viewBox", "0 0 678 1111");
+  mark.setAttribute("width", "16");
+  mark.setAttribute("height", "26");
+  mark.setAttribute("aria-hidden", "true");
+  mark.setAttribute("focusable", "false");
+  mark.style.cssText = "display:block;flex:none;color:#a8c5ba";
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", BRAND_MARK_PATH);
+  path.setAttribute("fill", "currentColor");
+  mark.append(path);
+  icon.replaceWith(mark);
+  launcher.dataset.syfxBrandMark = "true";
+}
 
 function isVisible(element: Element | null): boolean {
   if (!element) return false;
@@ -65,8 +129,10 @@ function adapt(host: Element): boolean {
     style.textContent = css;
     root.appendChild(style);
   }
+  applyCompanyMark(root);
   const syncOpen = () => {
     document.body.toggleAttribute("data-chat-open", isVisible(root.querySelector(".syfx-panel")));
+    applyCompanyMark(root);
   };
   syncOpen();
   new MutationObserver(syncOpen).observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "hidden", "aria-hidden", "open"] });

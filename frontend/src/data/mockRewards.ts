@@ -3,22 +3,16 @@
 // are shown on the page. Never used in API mode, where the backend owns accounts and points.
 // It follows the backend's rules: no welcome points, and pending reward requests hold points.
 import type {
-  ApprovalStatus, RegisterInput, RewardItem, RewardsAdminOverview, RewardsMember, RewardsMemberDetail, RewardsMessage,
+  ApprovalStatus, PointsHistoryEntry, RegisterInput, RewardItem, RewardsAdminOverview, RewardsMember, RewardsMemberDetail, RewardsMessage,
   RewardsPoints, RewardsRedemption, RewardsService, RewardsSession, RewardsVoucher, VoucherInput,
 } from "@/lib/rewards";
+import rewardsCatalog from "@/data/rewardsCatalog.json";
 
 const DEMO_ADMIN = { email: "admin@switchyardfx.com.au", password: "switchyard" };
 
-const CATALOGUE: RewardItem[] = [
-  { id: "voucher-50", title: "$50 eGift voucher", description: "Redeem against a $50 digital gift voucher.", points: 5000, category: "Vouchers" },
-  { id: "voucher-100", title: "$100 eGift voucher", description: "Redeem against a $100 digital gift voucher.", points: 9500, category: "Vouchers" },
-  { id: "voucher-250", title: "$250 eGift voucher", description: "Redeem against a $250 digital gift voucher.", points: 22000, category: "Vouchers" },
-  { id: "fx-report", title: "Premium FX outlook report", description: "A quarterly FX outlook prepared by our advisory team.", points: 2500, category: "Insights" },
-  { id: "treasury-review", title: "Treasury health check", description: "A structured review of your exposure visibility and hedge coverage.", points: 6000, category: "Advisory" },
-  { id: "charity-25", title: "$25 charity donation", description: "We donate $25 to a charity of your choice on your behalf.", points: 1000, category: "Give back" },
-];
+const CATALOGUE: RewardItem[] = rewardsCatalog;
 
-type StoredMember = Omit<RewardsMember, "points"> & { password: string; vouchers: RewardsVoucher[]; redemptions: RewardsRedemption[] };
+type StoredMember = Omit<RewardsMember, "points"> & { password: string; welcome_points?: number; vouchers: RewardsVoucher[]; redemptions: RewardsRedemption[] };
 type Store = { members: StoredMember[]; session: { role: "member"; email: string } | { role: "admin" } | null };
 
 const KEY = "switchyard-rewards-v2";
@@ -62,7 +56,7 @@ const delay = () => new Promise((resolve) => window.setTimeout(resolve, 160));
 const ok = (message: string): RewardsMessage => ({ ok: true, message });
 
 function points(member: StoredMember): RewardsPoints {
-  const accrued = member.vouchers.filter((v) => v.status === "approved").reduce((sum, v) => sum + v.claimed_points, 0);
+  const accrued = (member.welcome_points ?? 0) + member.vouchers.filter((v) => v.status === "approved").reduce((sum, v) => sum + v.claimed_points, 0);
   const redeemed = member.redemptions.filter((r) => r.status !== "rejected").reduce((sum, r) => sum + r.points, 0);
   return {
     accrued,
@@ -79,7 +73,24 @@ function view(member: StoredMember): RewardsMember {
 }
 
 function detail(member: StoredMember): RewardsMemberDetail {
-  return { ...view(member), vouchers: member.vouchers, redemptions: member.redemptions };
+  const history: PointsHistoryEntry[] = [
+    ...member.vouchers.map((voucher) => ({
+      id: `voucher-${voucher.id}`, kind: "credit" as const, title: "Points voucher",
+      detail: [voucher.file_name, voucher.note].filter(Boolean).join(" · "), points: voucher.claimed_points,
+      status: voucher.status, created_at: voucher.created_at,
+    })),
+    ...member.redemptions.map((redemption) => ({
+      id: `redemption-${redemption.id}`, kind: "debit" as const, title: redemption.reward_title,
+      detail: redemption.note || "Reward request", points: redemption.points,
+      status: redemption.status, created_at: redemption.created_at,
+    })),
+  ];
+  if (member.welcome_points) history.push({
+    id: "welcome-points", kind: "credit", title: "Welcome points", detail: "Member account approval",
+    points: member.welcome_points, status: "approved", created_at: member.created_at,
+  });
+  history.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  return { ...view(member), vouchers: member.vouchers, redemptions: member.redemptions, points_history: history };
 }
 
 function find(email: string): StoredMember | undefined {
@@ -162,6 +173,7 @@ export const mockRewards: RewardsService = {
     const member = signedInMember();
     const reward = CATALOGUE.find((item) => item.id === rewardId);
     if (!reward) throw new Error("That reward is no longer available.");
+    if (reward.points === null) throw new Error("Points pricing for this reward is still being confirmed.");
     if (points(member).vested < reward.points) throw new Error("You don't have enough vested points for this reward.");
     const redemption: RewardsRedemption = { id: uid(), reward_id: reward.id, reward_title: reward.title, points: reward.points, note: note.trim(), status: "pending", created_at: nowISO() };
     update((m) => m.id === member.id, (m) => ({ ...m, redemptions: [redemption, ...m.redemptions] }));

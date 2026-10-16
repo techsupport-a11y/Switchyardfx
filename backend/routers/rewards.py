@@ -12,10 +12,12 @@ import binascii
 import hashlib
 import hmac
 import html
+import json
 import logging
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import httpx
 from bson import Binary, ObjectId
@@ -31,6 +33,7 @@ from models.rewards import (
     MemberView,
     PendingRedemption,
     PendingVoucher,
+    PointsHistoryEntry,
     RedemptionCreate,
     RedemptionView,
     RegisterRequest,
@@ -65,14 +68,9 @@ VOUCHER_SIGNATURES = {
 RESEND_URL = "https://api.resend.com/emails"
 
 # The reward catalogue. Points are checked against this server-side list, never the client's.
-CATALOGUE = [
-    RewardItem(id="voucher-50", title="$50 eGift voucher", description="Redeem against a $50 digital gift voucher.", points=5000, category="Vouchers"),
-    RewardItem(id="voucher-100", title="$100 eGift voucher", description="Redeem against a $100 digital gift voucher.", points=9500, category="Vouchers"),
-    RewardItem(id="voucher-250", title="$250 eGift voucher", description="Redeem against a $250 digital gift voucher.", points=22000, category="Vouchers"),
-    RewardItem(id="fx-report", title="Premium FX outlook report", description="A quarterly FX outlook prepared by our advisory team.", points=2500, category="Insights"),
-    RewardItem(id="treasury-review", title="Treasury health check", description="A structured review of your exposure visibility and hedge coverage.", points=6000, category="Advisory"),
-    RewardItem(id="charity-25", title="$25 charity donation", description="We donate $25 to a charity of your choice on your behalf.", points=1000, category="Give back"),
-]
+# Voucher values and temporary point costs come from the current Rewards catalogue.
+CATALOGUE_PATH = Path(__file__).resolve().parents[1] / "data" / "rewards_catalog.json"
+CATALOGUE = [RewardItem(**item) for item in json.loads(CATALOGUE_PATH.read_text(encoding="utf-8"))]
 CATALOGUE_BY_ID = {item.id: item for item in CATALOGUE}
 
 
@@ -204,6 +202,45 @@ def _redemption_view(doc: dict) -> RedemptionView:
     return RedemptionView(id=str(doc["_id"]), reward_id=doc["reward_id"], reward_title=doc["reward_title"], points=doc["points"], note=doc.get("note", ""), status=doc["status"], created_at=_iso(doc["created_at"]))
 
 
+def _points_history(member: dict, vouchers: list[dict], redemptions: list[dict]) -> list[PointsHistoryEntry]:
+    entries = [
+        PointsHistoryEntry(
+            id=f"voucher-{voucher['_id']}",
+            kind="credit",
+            title="Points voucher",
+            detail=" · ".join(part for part in (voucher["file_name"], voucher.get("note", "")) if part),
+            points=voucher["claimed_points"],
+            status=voucher["status"],
+            created_at=_iso(voucher["created_at"]),
+        )
+        for voucher in vouchers
+    ]
+    entries.extend(
+        PointsHistoryEntry(
+            id=f"redemption-{redemption['_id']}",
+            kind="debit",
+            title=redemption["reward_title"],
+            detail=redemption.get("note", "Reward request"),
+            points=redemption["points"],
+            status=redemption["status"],
+            created_at=_iso(redemption["created_at"]),
+        )
+        for redemption in redemptions
+    )
+    welcome_points = int(member.get("welcome_points", 0))
+    if welcome_points > 0:
+        entries.append(PointsHistoryEntry(
+            id="welcome-points",
+            kind="credit",
+            title="Welcome points",
+            detail="Member account approval",
+            points=welcome_points,
+            status="approved",
+            created_at=_iso(member.get("reviewed_at") or member["created_at"]),
+        ))
+    return sorted(entries, key=lambda entry: entry.created_at, reverse=True)
+
+
 def _member_view(member: dict, vouchers: list[dict], redemptions: list[dict]) -> MemberView:
     return MemberView(
         id=str(member["_id"]),
@@ -225,7 +262,12 @@ async def _member_activity(member_id: ObjectId) -> tuple[list[dict], list[dict]]
 async def _member_detail(member: dict) -> MemberDetail:
     vouchers, redemptions = await _member_activity(member["_id"])
     view = _member_view(member, vouchers, redemptions)
-    return MemberDetail(**view.model_dump(), vouchers=[_voucher_view(v) for v in vouchers], redemptions=[_redemption_view(r) for r in redemptions])
+    return MemberDetail(
+        **view.model_dump(),
+        vouchers=[_voucher_view(v) for v in vouchers],
+        redemptions=[_redemption_view(r) for r in redemptions],
+        points_history=_points_history(member, vouchers, redemptions),
+    )
 
 
 async def _notify_team(subject: str, lines: list[tuple[str, str]]) -> None:
@@ -377,6 +419,8 @@ async def request_reward(input: RedemptionCreate, member: dict = Depends(_requir
     reward = CATALOGUE_BY_ID.get(input.reward_id)
     if not reward:
         raise HTTPException(status_code=404, detail="That reward is no longer available.")
+    if reward.points is None:
+        raise HTTPException(status_code=409, detail="Points pricing for this reward is still being confirmed.")
     not_enough = HTTPException(status_code=400, detail="You don't have enough vested points for this reward.")
     vouchers, redemptions = await _member_activity(member["_id"])
     if _points(member, vouchers, redemptions).vested < reward.points:

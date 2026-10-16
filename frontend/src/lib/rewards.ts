@@ -11,12 +11,13 @@ import { SWITCHYARD_DATA_MODE } from "@/services/switchyard";
 
 export type ApprovalStatus = "pending" | "approved" | "rejected";
 
-export interface RewardItem { id: string; title: string; description: string; points: number; category: string }
+export interface RewardItem { id: string; title: string; description: string; points: number | null; value_aud: number; category: string; link: string; image: string; trending: boolean }
 export interface RewardsPoints { accrued: number; vested: number; redeemed: number; pending_vouchers: number; pending_redemptions: number }
 export interface RewardsVoucher { id: string; file_name: string; note: string; claimed_points: number; status: ApprovalStatus; created_at: string }
 export interface RewardsRedemption { id: string; reward_id: string; reward_title: string; points: number; note: string; status: ApprovalStatus; created_at: string }
+export interface PointsHistoryEntry { id: string; kind: "credit" | "debit"; title: string; detail: string; points: number; status: ApprovalStatus; created_at: string }
 export interface RewardsMember { id: string; name: string; company: string; email: string; status: ApprovalStatus; created_at: string; points: RewardsPoints }
-export interface RewardsMemberDetail extends RewardsMember { vouchers: RewardsVoucher[]; redemptions: RewardsRedemption[] }
+export interface RewardsMemberDetail extends RewardsMember { vouchers: RewardsVoucher[]; redemptions: RewardsRedemption[]; points_history: PointsHistoryEntry[] }
 export interface RewardsSession { role: "guest" | "member" | "admin"; member: RewardsMemberDetail | null; admin_email: string | null }
 export interface RewardsAdminOverview {
   members: RewardsMember[];
